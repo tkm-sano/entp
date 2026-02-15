@@ -1,0 +1,16 @@
+<div class="talent-projects">
+  <h3>出演実績</h3>
+
+  <ul>
+  {% for pid in include.talent.past_project_ids %}
+    {% assign project = site.data.projects | where: "id", pid | first %}
+    {% if project %}
+      <li>
+        {{ project.year }} /
+        {{ project.title }} /
+        {{ project.client }}
+      </li>
+    {% endif %}
+  {% endfor %}
+  </ul>
+</div>

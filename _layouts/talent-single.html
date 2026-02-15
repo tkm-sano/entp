@@ -1,0 +1,20 @@
+---
+layout: default
+---
+
+{% assign talent = site.data.talents | where: "id", page.id | first %}
+
+<section class="talent-single">
+
+  <div class="talent-header">
+    <h2>{{ talent.name }}</h2>
+    <p class="kana">{{ talent.name_kana }}</p>
+  </div>
+
+  {% include gallery.html talent=talent %}
+
+  {% include profile.html talent=talent %}
+
+  {% include projects.html talent=talent %}
+
+</section>

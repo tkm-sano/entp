@@ -1,0 +1,7 @@
+<div class="gallery">
+  {% for img in include.talent.images %}
+    <div class="gallery-item">
+      <img src="{{ img }}" alt="{{ include.talent.name }}">
+    </div>
+  {% endfor %}
+</div>

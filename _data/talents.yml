@@ -1,0 +1,425 @@
+- name: 山田花子
+  kana: yamada-hanako
+  age: 22
+  height: 165
+  gender: female
+  university: 慶應義塾大学
+  career: 
+    - 資生堂広告モデル
+    - ファッション誌掲載
+  tags:
+    - 可愛い系
+    - 清楚系
+  images:
+    - /assets/images/talents/sample.png
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Ito Daiki
+  kana: ITO DAIKI
+  gender: male
+  height: 180
+  age: 20
+  university: Keio University
+  career: Fashion model and commercial appearances.
+  profile_url: "/talents/ito-daiki/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Yamamoto Miu
+  kana: YAMAMOTO MIU
+  gender: female
+  height: 158
+  age: 20
+  university: Keio University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/yamamoto-miu/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Sato Sota
+  kana: SATO SOTA
+  gender: male
+  height: 160
+  age: 24
+  university: Chuo University
+  career: Fashion model and commercial appearances.
+  profile_url: "/talent/sato-sota/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Nakamura Mei
+  kana: NAKAMURA MEI
+  gender: female
+  height: 164
+  age: 26
+  university: Hosei University
+  career: Commercial actress.
+  profile_url: "/talent/nakamura-mei/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Ito Sota
+  kana: ITO SOTA
+  gender: male
+  height: 185
+  age: 21
+  university: Meiji University
+  career: Runway and editorial model.
+  profile_url: "/talent/ito-sota/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Watanabe Rina
+  kana: WATANABE RINA
+  gender: female
+  height: 172
+  age: 21
+  university: Hosei University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/watanabe-rina/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Suzuki Kenta
+  kana: SUZUKI KENTA
+  gender: male
+  height: 164
+  age: 23
+  university: Hosei University
+  career: Actor and commercial model.
+  profile_url: "/talent/suzuki-kenta/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Kobayashi Aoi
+  kana: KOBAYASHI AOI
+  gender: female
+  height: 178
+  age: 26
+  university: Hosei University
+  career: Runway and editorial model.
+  profile_url: "/talent/kobayashi-aoi/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Sato Takumi
+  kana: SATO TAKUMI
+  gender: male
+  height: 170
+  age: 27
+  university: Keio University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/sato-takumi/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Kobayashi Rina
+  kana: KOBAYASHI RINA
+  gender: female
+  height: 174
+  age: 20
+  university: Aoyama Gakuin University
+  career: Runway and editorial model.
+  profile_url: "/talent/kobayashi-rina/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Ito Taro
+  kana: ITO TARO
+  gender: male
+  height: 180
+  age: 28
+  university: Keio University
+  career: Runway and editorial model.
+  profile_url: "/talent/ito-taro/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Yamamoto Hanako
+  kana: YAMAMOTO HANAKO
+  gender: female
+  height: 171
+  age: 23
+  university: Chuo University
+  career: Fashion model and commercial appearances.
+  profile_url: "/talent/yamamoto-hanako/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Nakamura Daiki
+  kana: NAKAMURA DAIKI
+  gender: male
+  height: 172
+  age: 23
+  university: Meiji University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/nakamura-daiki/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Tanaka Miu
+  kana: TANAKA MIU
+  gender: female
+  height: 165
+  age: 27
+  university: Meiji University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/tanaka-miu/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Nakamura Takumi
+  kana: NAKAMURA TAKUMI
+  gender: male
+  height: 181
+  age: 24
+  university: Rikkyo University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/nakamura-takumi/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Yamamoto Yui
+  kana: YAMAMOTO YUI
+  gender: female
+  height: 183
+  age: 20
+  university: Meiji University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/yamamoto-yui/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Yamamoto Ren
+  kana: YAMAMOTO REN
+  gender: male
+  height: 176
+  age: 23
+  university: Rikkyo University
+  career: Commercial actress.
+  profile_url: "/talent/yamamoto-ren/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Yoshida Rina
+  kana: YOSHIDA RINA
+  gender: female
+  height: 173
+  age: 30
+  university: Aoyama Gakuin University
+  career: Influencer and brand ambassador.
+  profile_url: "/talent/yoshida-rina/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Kobayashi Yuto
+  kana: KOBAYASHI YUTO
+  gender: male
+  height: 164
+  age: 23
+  university: Hosei University
+  career: Fashion model and commercial appearances.
+  profile_url: "/talent/kobayashi-yuto/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Kobayashi Yui
+  kana: KOBAYASHI YUI
+  gender: female
+  height: 159
+  age: 22
+  university: Aoyama Gakuin University
+  career: Runway and editorial model.
+  profile_url: "/talent/kobayashi-yui/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Ito Riku
+  kana: ITO RIKU
+  gender: male
+  height: 166
+  age: 23
+  university: Hosei University
+  career: Commercial actress.
+  profile_url: "/talent/ito-riku/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Suzuki Hanako
+  kana: SUZUKI HANAKO
+  gender: female
+  height: 179
+  age: 25
+  university: Aoyama Gakuin University
+  career: Fashion model and commercial appearances.
+  profile_url: "/talent/suzuki-hanako/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Nakamura Haru
+  kana: NAKAMURA HARU
+  gender: male
+  height: 162
+  age: 22
+  university: Hosei University
+  career: Fashion model and commercial appearances.
+  profile_url: "/talent/nakamura-haru/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event
+- name: Yamada Yui
+  kana: YAMADA YUI
+  gender: female
+  height: 177
+  age: 27
+  university: Keio University
+  career: Runway and editorial model.
+  profile_url: "/talent/yamada-yui/"
+  images:
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  - "/assets/images/talents/sample.png"
+  works:
+  - 2023 Brand Campaign
+  - 2024 Fashion Event

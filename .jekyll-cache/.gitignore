@@ -1,0 +1,44 @@
+# Jekyll
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+vendor/
+.bundle/
+Gemfile.lock
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# =====================================
+# 個人情報・機密データ
+# =====================================
+
+# タレントの実データ（本番環境用）
+_data/talents.yml
+_data/talents-production.yml
+
+# タレントの実際の写真
+assets/images/talents/*.jpg
+assets/images/talents/*.jpeg
+assets/images/talents/*.png
+assets/images/talents/*.gif
+assets/images/talents/*.webp
+
+assets/images/talents/sample.png
+assets/images/talents/placeholder.png
+
+# 生成された個別ページ（実データ含む）
+_talents/*.md
+
+# 環境変数・設定ファイル
+.env
+.env.local
+config/secrets.yml

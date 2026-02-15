@@ -1,0 +1,154 @@
+I"<section class="hero">
+  <div class="container">
+    <h2>MissConnect</h2>
+    <p>
+      Refined. Precise. Professional.<br />
+      ミスコン出身者やインフルエンサーをご紹介します
+    </p>
+    <a href="/entp/talents/" class="btn-primary">
+      VIEW TALENTS
+    </a>
+  </div>
+</section>
+
+<section class="agency-statement" style="padding: 120px 0; text-align:center;">
+  <div class="container">
+    <h3 style="font-size: 24px; letter-spacing: 0.15em; margin-bottom: 30px;">
+      ABOUT US
+    </h3>
+    <p style="max-width: 700px; margin: 0 auto; color: #9a9a9a;">
+      案件に返信があったインフルエンサーへの対応、日程調整、および実際の撮影実施までのサポートを行います
+    </p>
+  </div>
+</section>
+
+<section class="featured-talents" style="padding-bottom: 120px;">
+  <div class="container">
+    <h3 style="text-align:center; font-size: 24px; letter-spacing: 0.15em; margin-bottom: 60px;">
+      FEATURED TALENTS
+    </h3>
+
+    <div class="talent-grid">
+      
+      <div class="talent-card">
+        <a href="/entp/talents/ito-daiki/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Ito Daiki" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Ito Daiki</h3>
+            <p>ITO DAIKI</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/ito-riku/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Ito Riku" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Ito Riku</h3>
+            <p>ITO RIKU</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/ito-sota/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Ito Sota" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Ito Sota</h3>
+            <p>ITO SOTA</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/ito-taro/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Ito Taro" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Ito Taro</h3>
+            <p>ITO TARO</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/kobayashi-aoi/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Kobayashi Aoi" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Kobayashi Aoi</h3>
+            <p>KOBAYASHI AOI</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/kobayashi-rina/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Kobayashi Rina" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Kobayashi Rina</h3>
+            <p>KOBAYASHI RINA</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/kobayashi-yui/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Kobayashi Yui" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Kobayashi Yui</h3>
+            <p>KOBAYASHI YUI</p>
+          </div>
+        </a>
+      </div>
+      
+      <div class="talent-card">
+        <a href="/entp/talents/kobayashi-yuto/">
+          <div class="image-wrapper">
+            
+              <img src="/entp/assets/images/talents/sample.png" alt="Kobayashi Yuto" />
+            
+          </div>
+          <div class="talent-info">
+            <h3>Kobayashi Yuto</h3>
+            <p>KOBAYASHI YUTO</p>
+          </div>
+        </a>
+      </div>
+      
+    </div>
+
+    <div style="text-align:center; margin-top:60px;">
+      <a href="/entp/talents/" class="btn-primary">
+        ALL TALENTS
+      </a>
+    </div>
+  </div>
+</section>
+:ET

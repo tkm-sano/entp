@@ -1,0 +1,32 @@
+<div class="filter-area">
+
+  <select id="genderFilter">
+    <option value="">性別すべて</option>
+    <option value="male">男性</option>
+    <option value="female">女性</option>
+  </select>
+
+  <input type="number" id="minHeight" placeholder="最低身長(cm)">
+
+</div>
+
+<script>
+const genderFilter = document.getElementById("genderFilter");
+const minHeight = document.getElementById("minHeight");
+const cards = document.querySelectorAll(".talent-card");
+
+function filterTalents() {
+  const gender = genderFilter.value;
+  const height = minHeight.value;
+
+  cards.forEach(card => {
+    const matchGender = !gender || card.dataset.gender === gender;
+    const matchHeight = !height || parseInt(card.dataset.height) >= parseInt(height);
+
+    card.style.display = (matchGender && matchHeight) ? "block" : "none";
+  });
+}
+
+genderFilter.addEventListener("change", filterTalents);
+minHeight.addEventListener("input", filterTalents);
+</script>
