@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/ito-sota/
+permalink: "/talents/ito-sota/"
 name: Ito Sota
 kana: ITO SOTA
 gender: male
-height: 185
 age: 21
+height: 185
+birthplace:
 university: Meiji University
 career: Runway and editorial model.
-profile_url: /talent/ito-sota/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

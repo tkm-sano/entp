@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/watanabe-rina/
+permalink: "/talents/watanabe-rina/"
 name: Watanabe Rina
 kana: WATANABE RINA
 gender: female
-height: 172
 age: 21
+height: 172
+birthplace:
 university: Hosei University
 career: Influencer and brand ambassador.
-profile_url: /talent/watanabe-rina/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

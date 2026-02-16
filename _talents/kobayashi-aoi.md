@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/kobayashi-aoi/
+permalink: "/talents/kobayashi-aoi/"
 name: Kobayashi Aoi
 kana: KOBAYASHI AOI
 gender: female
-height: 178
 age: 26
+height: 178
+birthplace:
 university: Hosei University
 career: Runway and editorial model.
-profile_url: /talent/kobayashi-aoi/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

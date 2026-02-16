@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/yamamoto-ren/
+permalink: "/talents/yamamoto-ren/"
 name: Yamamoto Ren
 kana: YAMAMOTO REN
 gender: male
-height: 176
 age: 23
+height: 176
+birthplace:
 university: Rikkyo University
 career: Commercial actress.
-profile_url: /talent/yamamoto-ren/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

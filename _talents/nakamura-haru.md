@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/nakamura-haru/
+permalink: "/talents/nakamura-haru/"
 name: Nakamura Haru
 kana: NAKAMURA HARU
 gender: male
-height: 162
 age: 22
+height: 162
+birthplace:
 university: Hosei University
 career: Fashion model and commercial appearances.
-profile_url: /talent/nakamura-haru/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

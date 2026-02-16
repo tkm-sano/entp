@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/nakamura-mei/
+permalink: "/talents/nakamura-mei/"
 name: Nakamura Mei
 kana: NAKAMURA MEI
 gender: female
-height: 164
 age: 26
+height: 164
+birthplace:
 university: Hosei University
 career: Commercial actress.
-profile_url: /talent/nakamura-mei/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

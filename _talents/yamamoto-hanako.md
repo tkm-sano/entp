@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/yamamoto-hanako/
+permalink: "/talents/yamamoto-hanako/"
 name: Yamamoto Hanako
 kana: YAMAMOTO HANAKO
 gender: female
-height: 171
 age: 23
+height: 171
+birthplace:
 university: Chuo University
 career: Fashion model and commercial appearances.
-profile_url: /talent/yamamoto-hanako/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---

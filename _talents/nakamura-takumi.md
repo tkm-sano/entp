@@ -1,21 +1,23 @@
 ---
 layout: talent-single
-permalink: /talents/nakamura-takumi/
+permalink: "/talents/nakamura-takumi/"
 name: Nakamura Takumi
 kana: NAKAMURA TAKUMI
 gender: male
-height: 181
 age: 24
+height: 181
+birthplace:
 university: Rikkyo University
 career: Influencer and brand ambassador.
-profile_url: /talent/nakamura-takumi/
+tags: []
 images:
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-  - /assets/images/talents/sample.png
-works:
-  - 2023 Brand Campaign
-  - 2024 Fashion Event
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+- "/assets/images/talents/sample.png"
+past_projects: []
+social:
+  instagram: ''
+  x: ''
 ---
