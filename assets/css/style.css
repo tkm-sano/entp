@@ -453,7 +453,6 @@ nav a:hover {
   object-fit: cover;   /* 画像比率を保ちながら枠いっぱいに表示 */
   display: block;
 }
-<style>
 /* 背景を暗くして中央表示 */
 .lightbox-overlay {
   position: fixed;
@@ -484,4 +483,3 @@ nav a:hover {
   font-size: 2rem;
   cursor: pointer;
 }
-</style>
