@@ -30,4 +30,4 @@ defaults:
 
 exclude:
   - scripts/
-  - .github/
+  - .git

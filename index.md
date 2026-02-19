@@ -27,10 +27,4 @@ title: MODEL DATABASE
 
 </section>
 
-<nav class="pagination" id="modelPagination" aria-label="モデル一覧ページネーション"></nav>
-
-<!-- ================================
-     FILTER SCRIPT
-================================ -->
-<script src="{{ '/assets/js/filter.js' | relative_url }}" defer>
-</script>
+<nav class="pagination" id="modelPagination" aria-label="モデル一覧ページネ�
