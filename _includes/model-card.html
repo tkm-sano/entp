@@ -7,11 +7,15 @@
      data-tags="{{ include.model.tags | join: ',' | downcase | replace: ' ', '' }}"
      data-height="{{ include.model.height }}"
      data-age="{{ include.model.age }}">
+  {% assign card_image_src = include.model.images[0] %}
+  {% unless include.model.images[0] contains '://' %}
+    {% assign card_image_src = include.model.images[0] | relative_url %}
+  {% endunless %}
 
   <a href="{{ include.model.url | relative_url }}">
 
     <div class="image-wrapper">
-      <img src="{{ include.model.images[0] | relative_url }}"
+      <img src="{{ card_image_src }}"
            alt="{{ include.model.name }}">
     </div>
 

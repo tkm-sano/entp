@@ -17,18 +17,26 @@
       {% if page.images %}
         <div class="model-gallery">
           {% for image in page.images limit: 5 %}
+            {% assign image_src = image %}
+            {% unless image contains '://' %}
+              {% assign image_src = image | relative_url %}
+            {% endunless %}
             <button class="model-gallery-item"
                     type="button"
-                    data-preview-src="{{ image | relative_url }}"
+                    data-preview-src="{{ image_src }}"
                     data-preview-alt="{{ page.name }} {{ forloop.index }}">
-              <img src="{{ image | relative_url }}" alt="{{ page.name }} {{ forloop.index }}">
+              <img src="{{ image_src }}" alt="{{ page.name }} {{ forloop.index }}">
             </button>
           {% endfor %}
         </div>
 
+        {% assign first_image_src = page.images[0] %}
+        {% unless page.images[0] contains '://' %}
+          {% assign first_image_src = page.images[0] | relative_url %}
+        {% endunless %}
         <div class="model-main-image">
           <img id="modelPreviewImage"
-               src="{{ page.images[0] | relative_url }}"
+               src="{{ first_image_src }}"
                alt="{{ page.name }} 1">
         </div>
       {% endif %}
