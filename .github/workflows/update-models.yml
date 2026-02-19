@@ -20,7 +20,11 @@ jobs:
         run: pip install gspread oauth2client
 
       - name: Create credentials file
-        run: echo "${{ secrets.GOOGLE_SHEETS_KEY }}" > creds.json
+        run: |
+          printf '%s' '${{ secrets.GOOGLE_SHEETS_KEY }}' | tr -d '\r' > creds.json
+
+      - name: Validate credentials JSON
+        run: python -m json.tool creds.json > /dev/null
 
       - name: Fetch spreadsheet, generate JSON and Markdown
         run: python scripts/fetch_and_generate.py
