@@ -6,7 +6,13 @@
   <title>{{ page.name }} | {{ site.title }}</title>
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 </head>
-<body>
+<body class="model-page">
+  <div class="page-bg" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 768px)" srcset="{{ '/assets/images/bg-mobile.png' | relative_url }}">
+      <img src="{{ '/assets/images/2.png' | relative_url }}" alt="">
+    </picture>
+  </div>
 
   <div class="site-wrapper">
     <header class="site-header">
@@ -18,9 +24,12 @@
         <div class="model-gallery">
           {% for image in page.images limit: 5 %}
             {% assign image_src = image %}
+            {% assign image_srcset = '' %}
             {% if image contains 'drive.google.com/' %}
               {% assign drive_id = image | split: 'id=' | last | split: '&' | first %}
-              {% assign image_src = 'https://lh3.googleusercontent.com/d/' | append: drive_id | append: '=w2000' %}
+              {% assign drive_base = 'https://lh3.googleusercontent.com/d/' | append: drive_id %}
+              {% assign image_src = drive_base | append: '=w1200' %}
+              {% assign image_srcset = drive_base | append: '=w1200 1x, ' | append: drive_base | append: '=w2400 2x' %}
             {% endif %}
             {% unless image contains '://' %}
               {% assign image_src = image | relative_url %}
@@ -28,16 +37,25 @@
             <button class="model-gallery-item"
                     type="button"
                     data-preview-src="{{ image_src }}"
+                    {% if image_srcset != '' %}data-preview-srcset="{{ image_srcset }}"{% endif %}
                     data-preview-alt="{{ page.name }} {{ forloop.index }}">
-              <img src="{{ image_src }}" alt="{{ page.name }} {{ forloop.index }}">
+              <img src="{{ image_src }}"
+                   {% if image_srcset != '' %}srcset="{{ image_srcset }}"{% endif %}
+                   sizes="(max-width: 560px) 46vw, (max-width: 768px) 30vw, 180px"
+                   loading="lazy"
+                   decoding="async"
+                   alt="{{ page.name }} {{ forloop.index }}">
             </button>
           {% endfor %}
         </div>
 
         {% assign first_image_src = page.images[0] %}
+        {% assign first_image_srcset = '' %}
         {% if page.images[0] contains 'drive.google.com/' %}
           {% assign first_drive_id = page.images[0] | split: 'id=' | last | split: '&' | first %}
-          {% assign first_image_src = 'https://lh3.googleusercontent.com/d/' | append: first_drive_id | append: '=w2000' %}
+          {% assign first_drive_base = 'https://lh3.googleusercontent.com/d/' | append: first_drive_id %}
+          {% assign first_image_src = first_drive_base | append: '=w1200' %}
+          {% assign first_image_srcset = first_drive_base | append: '=w1200 1x, ' | append: first_drive_base | append: '=w2400 2x' %}
         {% endif %}
         {% unless page.images[0] contains '://' %}
           {% assign first_image_src = page.images[0] | relative_url %}
@@ -45,7 +63,16 @@
         <div class="model-main-image">
           <img id="modelPreviewImage"
                src="{{ first_image_src }}"
+               {% if first_image_srcset != '' %}srcset="{{ first_image_srcset }}"{% endif %}
+               sizes="(max-width: 768px) 94vw, 440px"
+               loading="eager"
+               decoding="async"
                alt="{{ page.name }} 1">
+        </div>
+
+        <div class="model-lightbox" id="modelLightbox" aria-hidden="true">
+          <button class="model-lightbox-close" id="modelLightboxClose" type="button" aria-label="閉じる">×</button>
+          <img id="modelLightboxImage" src="" alt="">
         </div>
       {% endif %}
 
@@ -63,6 +90,14 @@
         {% if skill_hobby %}<p><strong>特技・趣味：</strong>{{ skill_hobby }}</p>{% endif %}
         {% if miss_contest_year %}<p><strong>ミスコン出場年度：</strong>{{ miss_contest_year }}</p>{% endif %}
       </div>
+
+      {% if page.tags and page.tags.size > 0 %}
+        <div class="model-tags" aria-label="タグ">
+          {% for tag in page.tags %}
+            <span class="model-tag">#{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       <div class="model-social">
         {% if instagram_url %}
@@ -103,17 +138,72 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const previewImage = document.getElementById("modelPreviewImage");
+      const lightbox = document.getElementById("modelLightbox");
+      const lightboxImage = document.getElementById("modelLightboxImage");
+      const lightboxClose = document.getElementById("modelLightboxClose");
       const triggers = document.querySelectorAll("[data-preview-src]");
+      const mobileQuery = window.matchMedia("(max-width: 768px)");
 
       if (!previewImage || triggers.length === 0) return;
 
+      function openLightbox(src, srcset, alt) {
+        if (!lightbox || !lightboxImage) return;
+        lightboxImage.src = src;
+        if (srcset) {
+          lightboxImage.srcset = srcset;
+        } else {
+          lightboxImage.removeAttribute("srcset");
+        }
+        lightboxImage.alt = alt || "";
+        lightbox.classList.add("is-open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.remove("is-open");
+        lightbox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
       triggers.forEach(trigger => {
         trigger.addEventListener("click", () => {
-          previewImage.src = trigger.dataset.previewSrc || previewImage.src;
-          previewImage.alt = trigger.dataset.previewAlt || previewImage.alt;
+          const nextSrc = trigger.dataset.previewSrc || previewImage.src;
+          const nextSrcset = trigger.dataset.previewSrcset || "";
+          const nextAlt = trigger.dataset.previewAlt || previewImage.alt;
+          previewImage.src = nextSrc;
+          if (trigger.dataset.previewSrcset) {
+            previewImage.srcset = trigger.dataset.previewSrcset;
+          } else {
+            previewImage.removeAttribute("srcset");
+          }
+          previewImage.alt = nextAlt;
           triggers.forEach(t => t.classList.remove("active"));
           trigger.classList.add("active");
+
+          if (mobileQuery.matches) {
+            openLightbox(nextSrc, nextSrcset, nextAlt);
+          }
         });
+      });
+
+      if (lightbox) {
+        lightbox.addEventListener("click", (event) => {
+          if (event.target === lightbox) {
+            closeLightbox();
+          }
+        });
+      }
+
+      if (lightboxClose) {
+        lightboxClose.addEventListener("click", closeLightbox);
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && lightbox && lightbox.classList.contains("is-open")) {
+          closeLightbox();
+        }
       });
 
       triggers[0].classList.add("active");
