@@ -16,4 +16,36 @@
     {% assign card_image_srcset = drive_base | append: '=w700 1x, ' | append: drive_base | append: '=w1400 2x' %}
   {% endif %}
   {% unless include.model.images[0] contains '://' %}
-    {% assign card_image_src = include.model.images[0] | relative_url %
+    {% assign card_image_src = include.model.images[0] | relative_url %}
+  {% endunless %}
+
+  <a href="{{ include.model.url | relative_url }}">
+
+    <div class="image-wrapper">
+      <img src="{{ card_image_src }}"
+           {% if card_image_srcset != '' %}srcset="{{ card_image_srcset }}"{% endif %}
+           sizes="(max-width: 480px) 94vw, (max-width: 768px) 45vw, 220px"
+           loading="lazy"
+           decoding="async"
+           alt="{{ include.model.name }}">
+    </div>
+
+    <div class="model-info">
+      <h3>{{ include.model.name }}</h3>
+      <p>{{ include.model.kana }}</p>
+      <p>
+        {{ include.model.height }}cm |
+        {{ include.model.age }}歳
+      </p>
+      {% if include.model.tags and include.model.tags.size > 0 %}
+        <div class="model-card-tags">
+          {% for tag in include.model.tags %}
+            <span class="model-card-tag">#{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+  </a>
+
+</div>
