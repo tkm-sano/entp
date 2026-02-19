@@ -1,0 +1,33 @@
+# Run-from-subdir helper
+# Allows `jekyll serve` executed inside `_models` to build the project root.
+source: ..
+destination: /tmp/talent-site/_site
+
+# Site info
+title: MissConnect
+baseurl: ""
+url: "https://username.github.io"
+layouts_dir: "_layouts"
+
+# Collections
+collections:
+  models:
+    output: true
+    permalink: /models/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "models"
+    values:
+      layout: model
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: default
+
+exclude:
+  - scripts/
+  - .github/

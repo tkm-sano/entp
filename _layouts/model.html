@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.name }} | {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+
+  <div class="site-wrapper">
+    <header class="site-header">
+      <h1>{{ page.name }}</h1>
+    </header>
+
+    <main class="site-main">
+      {% if page.images %}
+        <div class="model-gallery">
+          {% for image in page.images limit: 5 %}
+            <button class="model-gallery-item"
+                    type="button"
+                    data-preview-src="{{ image | relative_url }}"
+                    data-preview-alt="{{ page.name }} {{ forloop.index }}">
+              <img src="{{ image | relative_url }}" alt="{{ page.name }} {{ forloop.index }}">
+            </button>
+          {% endfor %}
+        </div>
+
+        <div

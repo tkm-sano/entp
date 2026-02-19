@@ -1,0 +1,30 @@
+<!-- ================================
+   MODEL CARD COMPONENT
+================================ -->
+
+<div class="model-card"
+     data-gender="{{ include.model.gender | downcase }}"
+     data-tags="{{ include.model.tags | join: ',' | downcase | replace: ' ', '' }}"
+     data-height="{{ include.model.height }}"
+     data-age="{{ include.model.age }}">
+
+  <a href="{{ include.model.url | relative_url }}">
+
+    <div class="image-wrapper">
+      <img src="{{ include.model.images[0] | relative_url }}"
+           alt="{{ include.model.name }}">
+    </div>
+
+    <div class="model-info">
+      <h3>{{ include.model.name }}</h3>
+      <p>{{ include.model.kana }}</p>
+      <p>
+        {{ include.model.height }}cm |
+        {{ include.model.age }}歳 |
+        {{ include.model.tags | join: ', ' }}
+      </p>
+    </div>
+
+  </a>
+
+</div>

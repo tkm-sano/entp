@@ -1,32 +1,55 @@
-<div class="filter-area">
+<!-- ================================
+   FILTER COMPONENT
+================================ -->
 
-  <select id="genderFilter">
-    <option value="">性別すべて</option>
-    <option value="male">男性</option>
-    <option value="female">女性</option>
-  </select>
+<div class="filters">
+  <div class="filter-row">
+    <div class="filter-group">
+      <strong>性別：</strong>
+      <button class="filter-btn active" data-filter="gender" data-value="all">All</button>
+      <button class="filter-btn" data-filter="gender" data-value="male">男性</button>
+      <button class="filter-btn" data-filter="gender" data-value="female">女性</button>
+    </div>
 
-  <input type="number" id="minHeight" placeholder="最低身長(cm)">
+    <div class="filter-group" data-filter-group="tag">
+      <strong>タグ：</strong>
+      <button class="filter-btn" data-filter="tag" data-value="インフルエンサー">インフルエンサー</button>
+      <button class="filter-btn" data-filter="tag" data-value="ミス">ミス</button>
+      <button class="filter-btn" data-filter="tag" data-value="ミスター">ミスター</button>
+      <button class="filter-btn" data-filter="tag" data-value="可愛い系">可愛い系</button>
+      <button class="filter-btn" data-filter="tag" data-value="綺麗系">綺麗系</button>
+      <button class="filter-btn" data-filter="tag" data-value="清楚系">清楚系</button>
+      <button class="filter-btn" data-filter="tag" data-value="草食系">草食系</button>
+      <button class="filter-btn" data-filter="tag" data-value="犬系">犬系</button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <div class="filter-group filter-range-group">
+      <strong>身長：</strong>
+      <div class="range-filter" data-range-filter="height">
+        <div class="range-values">
+          <span data-range-label="height-min">150</span>cm - <span data-range-label="height-max">200</span>cm
+        </div>
+        <div class="range-inputs">
+          <input type="range" min="150" max="200" value="150" step="1" data-filter="height-min">
+          <input type="range" min="150" max="200" value="200" step="1" data-filter="height-max">
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-group filter-range-group">
+      <strong>年齢：</strong>
+      <div class="range-filter" data-range-filter="age">
+        <div class="range-values">
+          <span data-range-label="age-min">18</span>歳 - <span data-range-label="age-max">24</span>歳
+        </div>
+        <div class="range-inputs">
+          <input type="range" min="18" max="24" value="18" step="1" data-filter="age-min">
+          <input type="range" min="18" max="24" value="24" step="1" data-filter="age-max">
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
-
-<script>
-const genderFilter = document.getElementById("genderFilter");
-const minHeight = document.getElementById("minHeight");
-const cards = document.querySelectorAll(".talent-card");
-
-function filterTalents() {
-  const gender = genderFilter.value;
-  const height = minHeight.value;
-
-  cards.forEach(card => {
-    const matchGender = !gender || card.dataset.gender === gender;
-    const matchHeight = !height || parseInt(card.dataset.height) >= parseInt(height);
-
-    card.style.display = (matchGender && matchHeight) ? "block" : "none";
-  });
-}
-
-genderFilter.addEventListener("change", filterTalents);
-minHeight.addEventListener("input", filterTalents);
-</script>

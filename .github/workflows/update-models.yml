@@ -1,0 +1,34 @@
+name: Update Models
+
+on:
+  workflow_dispatch:  # 手動実行のみ
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install gspread oauth2client
+
+      - name: Create credentials file
+        run: echo "${{ secrets.GOOGLE_SHEETS_KEY }}" > creds.json
+
+      - name: Fetch spreadsheet, generate JSON and Markdown
+        run: python scripts/fetch_and_generate.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add _data/models.json _models/
+          git commit -m "Update models from spreadsheet" || exit 0
+          git push

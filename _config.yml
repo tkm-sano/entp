@@ -1,34 +1,38 @@
-# Site settings
+# ---------------------------------
+# サイト基本情報
+# ---------------------------------
 title: MissConnect
-description: Talent Agency Website
-baseurl: "/entp"  # リポジトリ名
-url: "https://tkm-sano.github.io"  # あなたのGitHub Pages URL
+# Local previewではサブパスを付けない（/entp/ 404回避）
+# GitHub Pages配備時に必要なら "/entp" を設定
+baseurl: ""
+url: "https://username.github.io"
+layouts_dir: "_layouts"
+# Desktop/iCloud同期配下での書き込みタイムアウト回避
+destination: "/tmp/talent-site/_site"
 
-# Collections
+# ---------------------------------
+# コレクション設定
+# ---------------------------------
 collections:
-  talents:
-    output: true
-    permalink: /talents/:path/
+  models:
+    output: true               # 個別ページを生成
+    permalink: /models/:name/  # URL にモデルIDを使用
 
-# Defaults
+# ---------------------------------
+# デフォルトレイアウト設定
+# ---------------------------------
 defaults:
   - scope:
-      path: ""
-      type: "talents"
+      path: ""               # リポジトリ全体
+      type: "models"
     values:
-      layout: "talent-single"
+      layout: model          # _layouts/model.html を使用
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: default        # デフォルトレイアウト
 
-# Build settings
-markdown: kramdown
-plugins:
-  - jekyll-feed
-  - jekyll-seo-tag
-
-# Exclude from processing
 exclude:
-  - Gemfile
-  - Gemfile.lock
-  - vendor/
-  - talent-main-page.rb
-  - README.md
-  - _data/talents.yml  # 実データは除外
+  - scripts/
+  - .github/

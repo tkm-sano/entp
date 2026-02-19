@@ -1,0 +1,251 @@
+import glob
+import json
+import os
+import re
+import unicodedata
+from urllib.parse import parse_qs, urlparse
+
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+
+SHEET_NAME = "モデル一覧"
+DEFAULT_IMAGE = "/assets/images/models/sample.png"
+
+
+def first_value(record, keys, default=""):
+    for key in keys:
+        if key in record and record[key] is not None:
+            value = str(record[key]).strip()
+            if value != "":
+                return value
+    return default
+
+
+def parse_int(value, default=0):
+    if value is None:
+        return default
+    text = str(value).strip()
+    if text == "":
+        return default
+    match = re.search(r"\d+", text)
+    if not match:
+        return default
+    return int(match.group(0))
+
+
+def parse_list(value):
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(v).strip() for v in value if str(v).strip()]
+    text = str(value).strip()
+    if text == "":
+        return []
+    parts = re.split(r"[,\n、]+", text)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def extract_drive_file_id(url):
+    parsed = urlparse(url)
+    if "drive.google.com" not in parsed.netloc:
+        return ""
+
+    # /file/d/<FILE_ID>/view
+    match = re.search(r"/file/d/([a-zA-Z0-9_-]+)", parsed.path)
+    if match:
+        return match.group(1)
+
+    # /open?id=<FILE_ID> or other ?id=
+    query_id = parse_qs(parsed.query).get("id", [])
+    if query_id:
+        return query_id[0]
+
+    return ""
+
+
+def to_web_image_url(url):
+    value = str(url).strip()
+    if not value:
+        return ""
+
+    file_id = extract_drive_file_id(value)
+    if not file_id:
+        return value
+
+    # Google Driveの共有URLをWeb表示向けURLへ変換
+    return f"https://drive.google.com/uc?export=view&id={file_id}"
+
+
+def normalize_gender(value):
+    v = str(value).strip().lower()
+    if v in ("male", "man", "m", "男性"):
+        return "male"
+    if v in ("female", "woman", "f", "女性"):
+        return "female"
+    return ""
+
+
+def slugify(value):
+    value = unicodedata.normalize("NFKC", str(value)).lower().strip()
+    value = re.sub(r"\s+", "-", value)
+    value = re.sub(r"[^a-z0-9\-_]+", "-", value)
+    value = re.sub(r"-{2,}", "-", value).strip("-")
+    return value
+
+
+def yaml_scalar(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int):
+        return str(value)
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def to_front_matter(model):
+    lines = ["---"]
+    order = [
+        "layout",
+        "name",
+        "kana",
+        "gender",
+        "height",
+        "age",
+        "university",
+        "skill_hobby",
+        "miss_contest_year",
+        "tags",
+        "images",
+        "instagram_url",
+        "x_url",
+        "tiktok_url",
+    ]
+
+    for key in order:
+        if key not in model:
+            continue
+        value = model[key]
+        if value == "" or value is None:
+            continue
+
+        if isinstance(value, list):
+            if not value:
+                continue
+            lines.append(f"{key}:")
+            for item in value:
+                lines.append(f"  - {yaml_scalar(item)}")
+        else:
+            lines.append(f"{key}: {yaml_scalar(value)}")
+
+    lines.append("---")
+    return "\n".join(lines) + "\n"
+
+
+def build_model_record(record, index):
+    name = first_value(record, ["名前", "氏名", "name"])
+    kana = first_value(record, ["ふりがな", "名前カナ", "かな", "カナ", "kana"])
+    university = first_value(record, ["大学", "university", "school"])
+    # モデルIDは常に自動生成（シート入力値は使わない）
+    model_id = slugify(f"{name}-{university}")
+    if not model_id:
+        model_id = f"model-{index}"
+
+    age = parse_int(first_value(record, ["年齢", "age"]))
+    height = parse_int(first_value(record, ["身長", "height", "height_cm"]))
+    gender = normalize_gender(first_value(record, ["性別", "gender"]))
+
+    tags = parse_list(first_value(record, ["タグ", "tags"]))
+    images = parse_list(first_value(record, ["画像", "images", "image_urls"]))
+    converted_images = []
+    for image in images:
+        converted = to_web_image_url(image)
+        if converted:
+            converted_images.append(converted)
+    images = converted_images
+    if not images:
+        images = [DEFAULT_IMAGE]
+
+    skill_hobby = first_value(record, ["特技・趣味", "特技", "趣味", "skill_hobby", "skills_hobbies"])
+    miss_contest_year = first_value(
+        record,
+        ["ミスコン出場年度", "出場年度", "miss_contest_year", "contest_year"],
+    )
+
+    instagram_url = first_value(record, ["instagram_url", "instagram", "Instagram"])
+    x_url = first_value(record, ["x_url", "x", "X", "twitter_url", "twitter"])
+    tiktok_url = first_value(record, ["tiktok_url", "tiktok", "TikTok"])
+
+    model = {
+        "id": model_id,
+        "layout": "model",
+        "name": name,
+        "kana": kana,
+        "gender": gender,
+        "height": height,
+        "age": age,
+        "university": university,
+        "skill_hobby": skill_hobby,
+        "miss_contest_year": miss_contest_year,
+        "tags": tags,
+        "images": images,
+        "instagram_url": instagram_url,
+        "x_url": x_url,
+        "tiktok_url": tiktok_url,
+    }
+    return model_id, model
+
+
+def main():
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive",
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+    client = gspread.authorize(creds)
+
+    sheet = client.open(SHEET_NAME).sheet1
+    raw_records = sheet.get_all_records()
+
+    models = []
+    os.makedirs("_models", exist_ok=True)
+    current_ids = set()
+    used_ids = set()
+
+    for i, record in enumerate(raw_records, start=1):
+        model_id, model = build_model_record(record, i)
+
+        # 重複時は連番サフィックスを付与
+        base_id = model_id
+        n = 2
+        while model_id in used_ids:
+            model_id = f"{base_id}-{n}"
+            n += 1
+        used_ids.add(model_id)
+
+        model["id"] = model_id
+        current_ids.add(model_id)
+        models.append(model)
+
+        filepath = f"_models/{model_id}.md"
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(to_front_matter(model))
+
+    os.makedirs("_data", exist_ok=True)
+    with open("_data/models.json", "w", encoding="utf-8") as f:
+        json.dump(models, f, ensure_ascii=False, indent=2)
+
+    # シート0件時に既存ページを全削除しない安全策
+    if not raw_records:
+        print("No records found. Skip deleting existing model files.")
+        return
+
+    existing_files = glob.glob("_models/*.md")
+    for file_path in existing_files:
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        if file_name not in current_ids:
+            os.remove(file_path)
+            print(f"Deleted obsolete model page: {file_name}")
+
+
+if __name__ == "__main__":
+    main()
