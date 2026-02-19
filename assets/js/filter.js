@@ -5,6 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const PAGE_SIZE = 15;
   let currentPage = 1;
 
+  function toNumber(value) {
+    const n = parseInt(value || "", 10);
+    return Number.isFinite(n) ? n : null;
+  }
+
   const filters = {
     gender: "all",
     tags: new Set(),
@@ -35,6 +40,51 @@ document.addEventListener("DOMContentLoaded", () => {
   const ageMinLabel = document.querySelector('[data-range-label="age-min"]');
   const ageMaxLabel = document.querySelector('[data-range-label="age-max"]');
 
+  function getRangeFromCards(datasetValues, fallbackMin, fallbackMax) {
+    if (datasetValues.length === 0) {
+      return { min: fallbackMin, max: fallbackMax };
+    }
+    return {
+      min: Math.min(...datasetValues),
+      max: Math.max(...datasetValues)
+    };
+  }
+
+  function initializeRangesFromCards() {
+    const heights = cards
+      .map(card => toNumber(card.dataset.height))
+      .filter(value => value !== null);
+    const ages = cards
+      .map(card => toNumber(card.dataset.age))
+      .filter(value => value !== null);
+
+    const heightRange = getRangeFromCards(heights, filters.heightMin, filters.heightMax);
+    const ageRange = getRangeFromCards(ages, filters.ageMin, filters.ageMax);
+
+    filters.heightMin = heightRange.min;
+    filters.heightMax = heightRange.max;
+    filters.ageMin = ageRange.min;
+    filters.ageMax = ageRange.max;
+
+    if (heightMinInput && heightMaxInput) {
+      heightMinInput.min = String(heightRange.min);
+      heightMinInput.max = String(heightRange.max);
+      heightMaxInput.min = String(heightRange.min);
+      heightMaxInput.max = String(heightRange.max);
+      heightMinInput.value = String(heightRange.min);
+      heightMaxInput.value = String(heightRange.max);
+    }
+
+    if (ageMinInput && ageMaxInput) {
+      ageMinInput.min = String(ageRange.min);
+      ageMinInput.max = String(ageRange.max);
+      ageMaxInput.min = String(ageRange.min);
+      ageMaxInput.max = String(ageRange.max);
+      ageMinInput.value = String(ageRange.min);
+      ageMaxInput.value = String(ageRange.max);
+    }
+  }
+
   function normalizeTag(tag) {
     return tag.trim().toLowerCase();
   }
@@ -48,8 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getMatchedCards() {
     return cards.filter(card => {
-      const cardHeight = parseInt(card.dataset.height || "0", 10);
-      const cardAge = parseInt(card.dataset.age || "0", 10);
+      const cardHeight = toNumber(card.dataset.height) ?? 0;
+      const cardAge = toNumber(card.dataset.age) ?? 0;
       const cardTags = (card.dataset.tags || "")
         .split(",")
         .map(normalizeTag)
@@ -210,6 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindGenderEvents();
   bindTagEvents();
   bindRangeEvents();
+  initializeRangesFromCards();
   updateRangeLabels();
   filterCards();
 });

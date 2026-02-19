@@ -18,4 +18,5 @@ images:
   - "https://drive.google.com/thumbnail?id=1ExXYAihxasDmWH39GsgrcpSdT2xigziU&sz=w2000"
 instagram_url: "https://www.instagram.com/"
 x_url: "https://x.com/?lang=ja"
-tiktok_url: "https://w
+tiktok_url: "https://www.tiktok.com/"
+---
