@@ -8,6 +8,10 @@
      data-height="{{ include.model.height }}"
      data-age="{{ include.model.age }}">
   {% assign card_image_src = include.model.images[0] %}
+  {% if include.model.images[0] contains 'drive.google.com/' %}
+    {% assign drive_id = include.model.images[0] | split: 'id=' | last | split: '&' | first %}
+    {% assign card_image_src = 'https://lh3.googleusercontent.com/d/' | append: drive_id | append: '=w2000' %}
+  {% endif %}
   {% unless include.model.images[0] contains '://' %}
     {% assign card_image_src = include.model.images[0] | relative_url %}
   {% endunless %}

@@ -18,6 +18,10 @@
         <div class="model-gallery">
           {% for image in page.images limit: 5 %}
             {% assign image_src = image %}
+            {% if image contains 'drive.google.com/' %}
+              {% assign drive_id = image | split: 'id=' | last | split: '&' | first %}
+              {% assign image_src = 'https://lh3.googleusercontent.com/d/' | append: drive_id | append: '=w2000' %}
+            {% endif %}
             {% unless image contains '://' %}
               {% assign image_src = image | relative_url %}
             {% endunless %}
@@ -31,6 +35,10 @@
         </div>
 
         {% assign first_image_src = page.images[0] %}
+        {% if page.images[0] contains 'drive.google.com/' %}
+          {% assign first_drive_id = page.images[0] | split: 'id=' | last | split: '&' | first %}
+          {% assign first_image_src = 'https://lh3.googleusercontent.com/d/' | append: first_drive_id | append: '=w2000' %}
+        {% endif %}
         {% unless page.images[0] contains '://' %}
           {% assign first_image_src = page.images[0] | relative_url %}
         {% endunless %}
