@@ -2,54 +2,81 @@
    FILTER COMPONENT
 ================================ -->
 
-<div class="filters">
-  <div class="filter-row">
-    <div class="filter-group">
-      <strong>性別：</strong>
-      <button class="filter-btn active" data-filter="gender" data-value="all">All</button>
-      <button class="filter-btn" data-filter="gender" data-value="male">男性</button>
-      <button class="filter-btn" data-filter="gender" data-value="female">女性</button>
-    </div>
-
-    <div class="filter-group" data-filter-group="tag">
-      <strong>タグ：</strong>
-      <button class="filter-btn" data-filter="tag" data-value="インフルエンサー">インフルエンサー</button>
-      <button class="filter-btn" data-filter="tag" data-value="ミス">ミス</button>
-      <button class="filter-btn" data-filter="tag" data-value="ミスター">ミスター</button>
-      <button class="filter-btn" data-filter="tag" data-value="可愛い系">可愛い系</button>
-      <button class="filter-btn" data-filter="tag" data-value="綺麗系">綺麗系</button>
-      <button class="filter-btn" data-filter="tag" data-value="清楚系">清楚系</button>
-      <button class="filter-btn" data-filter="tag" data-value="草食系">草食系</button>
-      <button class="filter-btn" data-filter="tag" data-value="犬系">犬系</button>
-    </div>
-  </div>
-
-  <div class="filter-row">
-    <div class="filter-group filter-range-group">
-      <strong>身長：</strong>
-      <div class="range-filter" data-range-filter="height">
-        <div class="range-values">
-          <span data-range-label="height-min">150</span>cm - <span data-range-label="height-max">200</span>cm
-        </div>
-        <div class="range-inputs">
-          <input type="range" min="150" max="200" value="150" step="1" data-filter="height-min">
-          <input type="range" min="150" max="200" value="200" step="1" data-filter="height-max">
-        </div>
-      </div>
-    </div>
-
-    <div class="filter-group filter-range-group">
-      <strong>年齢：</strong>
-      <div class="range-filter" data-range-filter="age">
-        <div class="range-values">
-          <span data-range-label="age-min">18</span>歳 - <span data-range-label="age-max">24</span>歳
-        </div>
-        <div class="range-inputs">
-          <input type="range" min="18" max="24" value="18" step="1" data-filter="age-min">
-          <input type="range" min="18" max="24" value="24" step="1" data-filter="age-max">
-        </div>
-      </div>
-    </div>
-  </div>
-
+<div class="filters-mobile-bar">
+  <button type="button" class="filters-mobile-open" data-filter-action="open-sheet">
+    SELECT
+    <span class="filters-mobile-count" id="mobileFilterCount">0</span>
+  </button>
 </div>
+
+<div class="filters-sheet-backdrop" data-filter-action="close-sheet"></div>
+
+<section class="filters-sheet" id="filtersSheet" aria-label="SELECT条件" aria-hidden="false">
+  <div class="filters-sheet-grip" aria-hidden="true"></div>
+  <header class="filters-sheet-header">
+    <h2>SELECT</h2>
+    <button type="button" class="filters-sheet-close" data-filter-action="close-sheet" aria-label="SELECTを閉じる">×</button>
+  </header>
+
+  <div class="filters">
+    <div class="filter-row">
+      <div class="filter-group filter-select-group">
+        <label for="filterGender">性別</label>
+        <div class="select-wrap">
+          <select id="filterGender" data-filter-select="gender">
+            <option value="all">すべて</option>
+            <option value="male">男性</option>
+            <option value="female">女性</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-group filter-select-group filter-tag-group">
+        <label for="filterTag">タグ</label>
+        <div class="tag-options" id="filterTag">
+          <label class="tag-option"><input type="checkbox" data-filter-tag="インフルエンサー"><span>インフルエンサー</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="ミス"><span>ミス</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="ミスター"><span>ミスター</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="可愛い系"><span>可愛い系</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="綺麗系"><span>綺麗系</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="清楚系"><span>清楚系</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="草食系"><span>草食系</span></label>
+          <label class="tag-option"><input type="checkbox" data-filter-tag="犬系"><span>犬系</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <div class="filter-group filter-select-group filter-range-group">
+        <label>身長</label>
+        <div class="filter-range-selects">
+          <div class="select-wrap">
+            <select data-filter-select="height-min"></select>
+          </div>
+          <span>〜</span>
+          <div class="select-wrap">
+            <select data-filter-select="height-max"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group filter-select-group filter-range-group">
+        <label>年齢</label>
+        <div class="filter-range-selects">
+          <div class="select-wrap">
+            <select data-filter-select="age-min"></select>
+          </div>
+          <span>〜</span>
+          <div class="select-wrap">
+            <select data-filter-select="age-max"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-sheet-actions">
+    <button type="button" class="filter-btn" data-filter-action="reset">リセット</button>
+    <button type="button" class="filter-btn active" data-filter-action="apply">適用</button>
+  </div>
+</section>

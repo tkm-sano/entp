@@ -34,3 +34,10 @@ defaults:
 exclude:
   - scripts/
   - .github/
+  - .jekyll-cache/
+  - _site/
+  - _models/.jekyll-cache/
+  - _models/_site/
+  - scripts/__pycache__/
+  - assets/icons/instagram.svg
+  - _data/models.json
