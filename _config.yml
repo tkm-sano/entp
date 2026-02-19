@@ -2,10 +2,8 @@
 # サイト基本情報
 # ---------------------------------
 title: MissConnect
-# Local previewではサブパスを付けない（/entp/ 404回避）
-# GitHub Pages配備時に必要なら "/entp" を設定
-baseurl: ""
-url: "https://username.github.io"
+baseurl: "/entp"
+url: "https://tkm-sano.github.io"
 layouts_dir: "_layouts"
 # Desktop/iCloud同期配下での書き込みタイムアウト回避
 destination: "/tmp/talent-site/_site"

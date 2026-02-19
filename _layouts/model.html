@@ -26,4 +26,83 @@
           {% endfor %}
         </div>
 
-        <div
+        <div class="model-main-image">
+          <img id="modelPreviewImage"
+               src="{{ page.images[0] | relative_url }}"
+               alt="{{ page.name }} 1">
+        </div>
+      {% endif %}
+
+      {% assign skill_hobby = page.skill_hobby | default: page.specialty_hobby | default: page.hobby %}
+      {% assign miss_contest_year = page.miss_contest_year | default: page.misscontest_year %}
+      {% assign instagram_url = page.instagram_url | default: page.instagram %}
+      {% assign x_url = page.x_url | default: page.x | default: page.twitter_url | default: page.twitter %}
+      {% assign tiktok_url = page.tiktok_url | default: page.tiktok %}
+
+      <div class="model-profile">
+        <p><strong>名前：</strong>{{ page.name }}</p>
+        {% if page.kana %}<p><strong>ふりがな：</strong>{{ page.kana }}</p>{% endif %}
+        <p><strong>年齢：</strong>{{ page.age }}歳</p>
+        <p><strong>身長：</strong>{{ page.height }}cm</p>
+        {% if skill_hobby %}<p><strong>特技・趣味：</strong>{{ skill_hobby }}</p>{% endif %}
+        {% if miss_contest_year %}<p><strong>ミスコン出場年度：</strong>{{ miss_contest_year }}</p>{% endif %}
+      </div>
+
+      <div class="model-social">
+        {% if instagram_url %}
+          <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+            <img src="{{ '/assets/icons/instagram.svg' | relative_url }}" alt="Instagram">
+          </a>
+        {% endif %}
+        {% if x_url %}
+          <a href="{{ x_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="X">
+            <img src="{{ '/assets/icons/x.svg' | relative_url }}" alt="X">
+          </a>
+        {% endif %}
+        {% if tiktok_url %}
+          <a href="{{ tiktok_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok">
+            <img src="{{ '/assets/icons/tiktok.svg' | relative_url }}" alt="TikTok">
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="profile">
+        {{ content }}
+      </div>
+
+      <div class="model-back">
+        <a href="{{ '/' | relative_url }}"
+           class="btn-primary"
+           onclick="if (window.history.length > 1) { window.history.back(); return false; }">
+          戻る
+        </a>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }}</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const previewImage = document.getElementById("modelPreviewImage");
+      const triggers = document.querySelectorAll("[data-preview-src]");
+
+      if (!previewImage || triggers.length === 0) return;
+
+      triggers.forEach(trigger => {
+        trigger.addEventListener("click", () => {
+          previewImage.src = trigger.dataset.previewSrc || previewImage.src;
+          previewImage.alt = trigger.dataset.previewAlt || previewImage.alt;
+          triggers.forEach(t => t.classList.remove("active"));
+          trigger.classList.add("active");
+        });
+      });
+
+      triggers[0].classList.add("active");
+    });
+  </script>
+
+</body>
+</html>
