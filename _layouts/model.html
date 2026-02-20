@@ -25,53 +25,104 @@
       {% endif %}
       <div class="model-detail-layout{% unless has_images %} no-media{% endunless %}">
         {% if has_images %}
-          {% assign first_image_src = page.images[0] %}
-          {% assign first_image_srcset = '' %}
-          {% if page.images[0] contains 'drive.google.com/' %}
-            {% assign first_drive_id = page.images[0] | split: 'id=' | last | split: '&' | first %}
-            {% assign first_drive_base = 'https://lh3.googleusercontent.com/d/' | append: first_drive_id %}
-            {% assign first_image_src = first_drive_base | append: '=w1200' %}
-            {% assign first_image_srcset = first_drive_base | append: '=w1200 1x, ' | append: first_drive_base | append: '=w2400 2x' %}
+          {% assign first_media_raw = page.images[0] %}
+          {% assign first_media_src = first_media_raw %}
+          {% assign first_media_srcset = '' %}
+          {% assign first_media_type = '' %}
+          {% if first_media_raw.url %}
+            {% assign first_media_src = first_media_raw.url %}
           {% endif %}
-          {% unless page.images[0] contains '://' %}
-            {% assign first_image_src = page.images[0] | relative_url %}
+          {% if first_media_raw.type %}
+            {% assign first_media_type = first_media_raw.type | downcase %}
+          {% endif %}
+          {% assign first_media_probe = first_media_src | downcase | split: '?' | first | split: '#' | first %}
+          {% if first_media_type == '' %}
+            {% if first_media_probe contains '.mp4' or first_media_probe contains '.webm' or first_media_probe contains '.mov' or first_media_probe contains '.m4v' or first_media_probe contains '.ogv' %}
+              {% assign first_media_type = 'video' %}
+            {% else %}
+              {% assign first_media_type = 'image' %}
+            {% endif %}
+          {% endif %}
+          {% if first_media_type == 'image' and first_media_src contains 'drive.google.com/thumbnail' %}
+            {% assign first_drive_id = first_media_src | split: 'id=' | last | split: '&' | first %}
+            {% assign first_drive_base = 'https://lh3.googleusercontent.com/d/' | append: first_drive_id %}
+            {% assign first_media_src = first_drive_base | append: '=w1200' %}
+            {% assign first_media_srcset = first_drive_base | append: '=w1200 1x, ' | append: first_drive_base | append: '=w2400 2x' %}
+          {% endif %}
+          {% unless first_media_src contains '://' %}
+            {% assign first_media_src = first_media_src | relative_url %}
           {% endunless %}
 
-          <section class="model-media-panel" aria-label="モデル写真">
-            <div class="model-main-image">
-              <img id="modelPreviewImage"
-                   src="{{ first_image_src }}"
-                   {% if first_image_srcset != '' %}srcset="{{ first_image_srcset }}"{% endif %}
-                   sizes="(max-width: 768px) 94vw, 440px"
-                   loading="eager"
-                   decoding="async"
-                   alt="{{ page.name }} 1">
+          <section class="model-media-panel" aria-label="モデルメディア">
+            <div id="modelPreviewStage" class="model-main-image" data-preview-type="{{ first_media_type }}">
+              {% if first_media_type == 'video' %}
+                <video id="modelPreviewVideo"
+                       src="{{ first_media_src }}"
+                       controls
+                       playsinline
+                       preload="metadata"
+                       aria-label="{{ page.name }} 1"></video>
+              {% else %}
+                <img id="modelPreviewImage"
+                     src="{{ first_media_src }}"
+                     {% if first_media_srcset != '' %}srcset="{{ first_media_srcset }}"{% endif %}
+                     sizes="(max-width: 768px) 94vw, 440px"
+                     loading="eager"
+                     decoding="async"
+                     alt="{{ page.name }} 1">
+              {% endif %}
             </div>
 
             <div class="model-gallery">
-              {% for image in page.images limit: 5 %}
-                {% assign image_src = image %}
-                {% assign image_srcset = '' %}
-                {% if image contains 'drive.google.com/' %}
-                  {% assign drive_id = image | split: 'id=' | last | split: '&' | first %}
-                  {% assign drive_base = 'https://lh3.googleusercontent.com/d/' | append: drive_id %}
-                  {% assign image_src = drive_base | append: '=w1200' %}
-                  {% assign image_srcset = drive_base | append: '=w1200 1x, ' | append: drive_base | append: '=w2400 2x' %}
+              {% for media in page.images limit: 5 %}
+                {% assign media_src = media %}
+                {% assign media_srcset = '' %}
+                {% assign media_type = '' %}
+                {% if media.url %}
+                  {% assign media_src = media.url %}
                 {% endif %}
-                {% unless image contains '://' %}
-                  {% assign image_src = image | relative_url %}
+                {% if media.type %}
+                  {% assign media_type = media.type | downcase %}
+                {% endif %}
+                {% assign media_probe = media_src | downcase | split: '?' | first | split: '#' | first %}
+                {% if media_type == '' %}
+                  {% if media_probe contains '.mp4' or media_probe contains '.webm' or media_probe contains '.mov' or media_probe contains '.m4v' or media_probe contains '.ogv' %}
+                    {% assign media_type = 'video' %}
+                  {% else %}
+                    {% assign media_type = 'image' %}
+                  {% endif %}
+                {% endif %}
+                {% if media_type == 'image' and media_src contains 'drive.google.com/thumbnail' %}
+                  {% assign drive_id = media_src | split: 'id=' | last | split: '&' | first %}
+                  {% assign drive_base = 'https://lh3.googleusercontent.com/d/' | append: drive_id %}
+                  {% assign media_src = drive_base | append: '=w1200' %}
+                  {% assign media_srcset = drive_base | append: '=w1200 1x, ' | append: drive_base | append: '=w2400 2x' %}
+                {% endif %}
+                {% unless media_src contains '://' %}
+                  {% assign media_src = media_src | relative_url %}
                 {% endunless %}
-                <button class="model-gallery-item"
+                <button class="model-gallery-item{% if media_type == 'video' %} is-video{% endif %}"
                         type="button"
-                        data-preview-src="{{ image_src }}"
-                        {% if image_srcset != '' %}data-preview-srcset="{{ image_srcset }}"{% endif %}
+                        data-preview-src="{{ media_src }}"
+                        data-preview-type="{{ media_type }}"
+                        {% if media_srcset != '' %}data-preview-srcset="{{ media_srcset }}"{% endif %}
+                        aria-label="{{ page.name }} {{ forloop.index }}"
                         data-preview-alt="{{ page.name }} {{ forloop.index }}">
-                  <img src="{{ image_src }}"
-                       {% if image_srcset != '' %}srcset="{{ image_srcset }}"{% endif %}
-                       sizes="(max-width: 560px) 46vw, (max-width: 768px) 30vw, 180px"
-                       loading="lazy"
-                       decoding="async"
-                       alt="{{ page.name }} {{ forloop.index }}">
+                  {% if media_type == 'video' %}
+                    <video src="{{ media_src }}"
+                           muted
+                           playsinline
+                           preload="metadata"
+                           tabindex="-1"
+                           aria-hidden="true"></video>
+                  {% else %}
+                    <img src="{{ media_src }}"
+                         {% if media_srcset != '' %}srcset="{{ media_srcset }}"{% endif %}
+                         sizes="(max-width: 560px) 46vw, (max-width: 768px) 30vw, 180px"
+                         loading="lazy"
+                         decoding="async"
+                         alt="{{ page.name }} {{ forloop.index }}">
+                  {% endif %}
                 </button>
               {% endfor %}
             </div>
@@ -175,28 +226,97 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const previewImage = document.getElementById("modelPreviewImage");
-      const triggers = document.querySelectorAll("[data-preview-src]");
+      const previewStage = document.getElementById("modelPreviewStage");
+      const triggers = Array.from(document.querySelectorAll("[data-preview-src]"));
 
-      if (!previewImage || triggers.length === 0) return;
+      if (!previewStage || triggers.length === 0) return;
+
+      const buildPreviewVideo = (src, label) => {
+        const video = document.createElement("video");
+        video.id = "modelPreviewVideo";
+        video.src = src;
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.setAttribute("aria-label", label);
+        return video;
+      };
+
+      const buildThumbnailVideo = (src) => {
+        const video = document.createElement("video");
+        video.src = src;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.tabIndex = -1;
+        video.setAttribute("aria-hidden", "true");
+        return video;
+      };
+
+      const promoteTriggerToVideo = (trigger) => {
+        if (trigger.dataset.previewType === "video") return;
+        trigger.dataset.previewType = "video";
+        trigger.removeAttribute("data-preview-srcset");
+        trigger.classList.add("is-video");
+        const thumbnailImage = trigger.querySelector("img");
+        if (thumbnailImage && trigger.dataset.previewSrc) {
+          thumbnailImage.replaceWith(buildThumbnailVideo(trigger.dataset.previewSrc));
+        }
+      };
+
+      const renderPreview = (trigger) => {
+        const nextSrc = trigger.dataset.previewSrc;
+        if (!nextSrc) return;
+
+        const nextType = trigger.dataset.previewType === "video" ? "video" : "image";
+        const nextAlt = trigger.dataset.previewAlt || "モデルメディア";
+
+        previewStage.textContent = "";
+
+        if (nextType === "video") {
+          previewStage.appendChild(buildPreviewVideo(nextSrc, nextAlt));
+        } else {
+          const image = document.createElement("img");
+          image.id = "modelPreviewImage";
+          image.src = nextSrc;
+          if (trigger.dataset.previewSrcset) {
+            image.srcset = trigger.dataset.previewSrcset;
+          }
+          image.sizes = "(max-width: 768px) 94vw, 440px";
+          image.loading = "eager";
+          image.decoding = "async";
+          image.alt = nextAlt;
+          image.addEventListener("error", () => {
+            promoteTriggerToVideo(trigger);
+            renderPreview(trigger);
+          }, { once: true });
+          previewStage.appendChild(image);
+        }
+
+        previewStage.dataset.previewType = nextType;
+        triggers.forEach((item) => item.classList.remove("active"));
+        trigger.classList.add("active");
+      };
+
+      triggers.forEach((trigger) => {
+        if (trigger.dataset.previewType === "video") return;
+        const thumbnailImage = trigger.querySelector("img");
+        if (!thumbnailImage) return;
+        thumbnailImage.addEventListener("error", () => {
+          promoteTriggerToVideo(trigger);
+          if (trigger.classList.contains("active")) {
+            renderPreview(trigger);
+          }
+        }, { once: true });
+      });
 
       triggers.forEach(trigger => {
         trigger.addEventListener("click", () => {
-          const nextSrc = trigger.dataset.previewSrc || previewImage.src;
-          const nextAlt = trigger.dataset.previewAlt || previewImage.alt;
-          previewImage.src = nextSrc;
-          if (trigger.dataset.previewSrcset) {
-            previewImage.srcset = trigger.dataset.previewSrcset;
-          } else {
-            previewImage.removeAttribute("srcset");
-          }
-          previewImage.alt = nextAlt;
-          triggers.forEach(t => t.classList.remove("active"));
-          trigger.classList.add("active");
+          renderPreview(trigger);
         });
       });
 
-      triggers[0].classList.add("active");
+      renderPreview(triggers[0]);
     });
   </script>
 
