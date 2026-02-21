@@ -6,11 +6,14 @@ import unicodedata
 from urllib.parse import parse_qs, urlparse
 
 import gspread
+from gspread.utils import rowcol_to_a1
 from oauth2client.service_account import ServiceAccountCredentials
 
 
 SHEET_NAME = "モデル一覧"
 DEFAULT_IMAGE = "/assets/images/models/sample.png"
+MODEL_PAGE_URL_HEADER = "個別ページURL"
+SITE_CONFIG_PATH = "_config.yml"
 
 
 def first_value(record, keys, default=""):
@@ -20,6 +23,77 @@ def first_value(record, keys, default=""):
             if value != "":
                 return value
     return default
+
+
+def clean_yaml_value(value):
+    v = str(value).split("#", 1)[0].strip()
+    if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
+        return v[1:-1]
+    return v
+
+
+def load_site_url_config(path=SITE_CONFIG_PATH):
+    site_url = ""
+    baseurl = ""
+
+    if not os.path.exists(path):
+        return site_url, baseurl
+
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            if not site_url:
+                match = re.match(r"^\s*url:\s*(.+?)\s*$", line)
+                if match:
+                    site_url = clean_yaml_value(match.group(1))
+                    continue
+            if not baseurl:
+                match = re.match(r"^\s*baseurl:\s*(.+?)\s*$", line)
+                if match:
+                    baseurl = clean_yaml_value(match.group(1))
+                    continue
+
+    return site_url, baseurl
+
+
+def build_model_page_url(model_id, site_url, baseurl):
+    normalized_baseurl = str(baseurl).strip()
+    if normalized_baseurl in ("", "/"):
+        normalized_baseurl = ""
+    else:
+        normalized_baseurl = "/" + normalized_baseurl.strip("/")
+
+    path = f"{normalized_baseurl}/models/{model_id}/"
+    site_root = str(site_url).strip().rstrip("/")
+    if site_root:
+        return f"{site_root}{path}"
+    return path
+
+
+def ensure_sheet_column(sheet, header_name):
+    headers = sheet.row_values(1)
+    for idx, header in enumerate(headers, start=1):
+        if str(header).strip() == header_name:
+            return idx
+
+    col = len(headers) + 1 if headers else 1
+    sheet.update_cell(1, col, header_name)
+    return col
+
+
+def update_model_page_urls(sheet, row_url_pairs):
+    if not row_url_pairs:
+        return
+
+    url_col = ensure_sheet_column(sheet, MODEL_PAGE_URL_HEADER)
+    updates = [
+        {
+            "range": rowcol_to_a1(row, url_col),
+            "values": [[url]],
+        }
+        for row, url in row_url_pairs
+    ]
+    sheet.batch_update(updates, value_input_option="RAW")
+    print(f"Updated {len(row_url_pairs)} URLs in sheet column '{MODEL_PAGE_URL_HEADER}'.")
 
 
 def parse_int(value, default=0):
@@ -205,11 +279,13 @@ def main():
 
     sheet = client.open(SHEET_NAME).sheet1
     raw_records = sheet.get_all_records()
+    site_url, baseurl = load_site_url_config()
 
     models = []
     os.makedirs("_models", exist_ok=True)
     current_ids = set()
     used_ids = set()
+    row_url_pairs = []
 
     for i, record in enumerate(raw_records, start=1):
         model_id, model = build_model_record(record, i)
@@ -225,6 +301,7 @@ def main():
         model["id"] = model_id
         current_ids.add(model_id)
         models.append(model)
+        row_url_pairs.append((i + 1, build_model_page_url(model_id, site_url, baseurl)))
 
         filepath = f"_models/{model_id}.md"
         with open(filepath, "w", encoding="utf-8") as f:
@@ -233,6 +310,8 @@ def main():
     os.makedirs("_data", exist_ok=True)
     with open("_data/models.json", "w", encoding="utf-8") as f:
         json.dump(models, f, ensure_ascii=False, indent=2)
+
+    update_model_page_urls(sheet, row_url_pairs)
 
     # シート0件時に既存ページを全削除しない安全策
     if not raw_records:
