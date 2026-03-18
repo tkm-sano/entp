@@ -9,6 +9,7 @@ university: "SNS大学"
 skill_hobby: "カラオケ"
 tags:
   - "インフルエンサー"
+  - "ミス"
 images:
   - "/assets/images/models/sample.png"
 instagram_url: "https://www.instagram.com/"
