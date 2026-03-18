@@ -34,8 +34,8 @@
       <h3>{{ include.model.name }}</h3>
       <p>{{ include.model.kana }}</p>
       <p>
-        {{ include.model.height }}cm |
-        {{ include.model.age }}歳
+        <span class="numeric-readable">{{ include.model.height }}</span>cm |
+        <span class="numeric-readable">{{ include.model.age }}</span>歳
       </p>
       {% if include.model.tags and include.model.tags.size > 0 %}
         <div class="model-card-tags">

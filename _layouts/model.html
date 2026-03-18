@@ -146,11 +146,11 @@
               {% endif %}
               <div class="model-profile-item">
                 <dt>年齢</dt>
-                <dd>{{ page.age }}歳</dd>
+                <dd><span class="numeric-readable">{{ page.age }}</span>歳</dd>
               </div>
               <div class="model-profile-item">
                 <dt>身長</dt>
-                <dd>{{ page.height }}cm</dd>
+                <dd><span class="numeric-readable">{{ page.height }}</span>cm</dd>
               </div>
               {% if skill_hobby %}
                 <div class="model-profile-item">
@@ -161,7 +161,7 @@
               {% if miss_contest_year %}
                 <div class="model-profile-item">
                   <dt>ミスコン出場年度</dt>
-                  <dd>{{ miss_contest_year }}</dd>
+                  <dd><span class="numeric-readable">{{ miss_contest_year }}</span></dd>
                 </div>
               {% endif %}
             </dl>

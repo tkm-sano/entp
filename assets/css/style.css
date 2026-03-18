@@ -153,6 +153,14 @@ body {
   text-align: center;
 }
 
+/* 数字の視認性を上げるためのユーティリティ */
+.numeric-readable {
+  font-family: "Avenir Next", "Helvetica Neue", "Arial", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  letter-spacing: 0.015em;
+}
+
 .page-header {
   margin-bottom: 20px;
 }

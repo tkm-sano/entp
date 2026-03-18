@@ -1,7 +1,13 @@
 name: Update Models
 
 on:
-  workflow_dispatch:  # 手動実行のみ
+  workflow_dispatch:  # 手動実行
+  repository_dispatch:
+    types: [update-models-from-sheet]  # スプレッドシートからの実行
+
+concurrency:
+  group: update-models
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -11,6 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Show trigger source
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "event_action=${{ github.event.action || '' }}"
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
