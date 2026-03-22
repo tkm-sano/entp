@@ -21,6 +21,12 @@ jobs:
         run: |
           echo "event_name=${{ github.event_name }}"
           echo "event_action=${{ github.event.action || '' }}"
+      - name: Show dispatch payload
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        run: |
+          echo "client_payload.triggered_by=${{ github.event.client_payload.triggered_by || '' }}"
+          echo "client_payload.spreadsheet_id=${{ github.event.client_payload.spreadsheet_id || '' }}"
+          echo "client_payload.triggered_at=${{ github.event.client_payload.triggered_at || '' }}"
 
       - name: Checkout repository
         uses: actions/checkout@v3

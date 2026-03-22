@@ -78,8 +78,8 @@ function onOpen() {
 }
 
 function triggerUpdateModels() {
-	const owner = 'YOUR_GITHUB_OWNER';
-	const repo = 'talent-site';
+	const owner = 'tkm-sano';
+	const repo = 'entp';
 	const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
 
 	if (!token) {
