@@ -10,10 +10,7 @@
     "university": "SNS大学",
     "skill_hobby": "カラオケ",
     "miss_contest_year": "",
-    "tags": [
-      "インフルエンサー",
-      "ミス"
-    ],
+    "tags": [],
     "images": [
       "/assets/images/models/sample.png"
     ],
@@ -32,9 +29,7 @@
     "university": "立教大学",
     "skill_hobby": "筋トレ",
     "miss_contest_year": "2024",
-    "tags": [
-      "ミスター"
-    ],
+    "tags": [],
     "images": [
       "/assets/images/models/sample.png"
     ],
