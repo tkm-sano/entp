@@ -10,7 +10,10 @@
     "university": "SNS大学",
     "skill_hobby": "カラオケ",
     "miss_contest_year": "",
-    "tags": [],
+    "tags": [
+      "ミス",
+      "インフルエンサー"
+    ],
     "images": [
       "/assets/images/models/sample.png"
     ],
