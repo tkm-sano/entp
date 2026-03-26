@@ -165,41 +165,41 @@
                 </div>
               {% endif %}
             </dl>
+
+            {% if page.tags and page.tags.size > 0 %}
+              <div class="model-profile-tags">
+                <h2 class="model-section-heading">TAGS</h2>
+                <div class="model-tags" aria-label="タグ">
+                  {% for tag in page.tags %}
+                    <span class="model-tag">#{{ tag }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if instagram_url or x_url or tiktok_url %}
+              <div class="model-profile-social">
+                <h2 class="model-section-heading">SOCIAL</h2>
+                <div class="model-social">
+                  {% if instagram_url %}
+                    <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                      <img src="{{ '/assets/icons/instagram-white.svg' | relative_url }}" alt="Instagram">
+                    </a>
+                  {% endif %}
+                  {% if x_url %}
+                    <a href="{{ x_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="X">
+                      <img src="{{ '/assets/icons/x.svg' | relative_url }}" alt="X">
+                    </a>
+                  {% endif %}
+                  {% if tiktok_url %}
+                    <a href="{{ tiktok_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok">
+                      <img src="{{ '/assets/icons/tiktok.svg' | relative_url }}" alt="TikTok">
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
           </div>
-
-          {% if page.tags and page.tags.size > 0 %}
-            <div class="model-tags-wrap">
-              <h2 class="model-section-heading">TAGS</h2>
-              <div class="model-tags" aria-label="タグ">
-                {% for tag in page.tags %}
-                  <span class="model-tag">#{{ tag }}</span>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if instagram_url or x_url or tiktok_url %}
-            <div class="model-social-wrap">
-              <h2 class="model-section-heading">SOCIAL</h2>
-              <div class="model-social">
-                {% if instagram_url %}
-                  <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
-                    <img src="{{ '/assets/icons/instagram-white.svg' | relative_url }}" alt="Instagram">
-                  </a>
-                {% endif %}
-                {% if x_url %}
-                  <a href="{{ x_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="X">
-                    <img src="{{ '/assets/icons/x.svg' | relative_url }}" alt="X">
-                  </a>
-                {% endif %}
-                {% if tiktok_url %}
-                  <a href="{{ tiktok_url }}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok">
-                    <img src="{{ '/assets/icons/tiktok.svg' | relative_url }}" alt="TikTok">
-                  </a>
-                {% endif %}
-              </div>
-            </div>
-          {% endif %}
         </section>
       </div>
 

@@ -116,7 +116,17 @@ def parse_list(value):
     text = str(value).strip()
     if text == "":
         return []
-    parts = re.split(r"[,\n、]+", text)
+
+    # JSON配列文字列（例: ["a", "b"]）も受け付ける
+    if text.startswith("[") and text.endswith("]"):
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, list):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+        except json.JSONDecodeError:
+            pass
+
+    parts = re.split(r"[,\n、;]+", text)
     return [p.strip() for p in parts if p.strip()]
 
 
@@ -228,7 +238,9 @@ def build_model_record(record, index):
     height = parse_int(first_value(record, ["身長", "height", "height_cm"]))
     gender = normalize_gender(first_value(record, ["性別", "gender"]))
 
-    tags = parse_list(first_value(record, ["タグ", "tags"]))
+    tags = parse_list(
+        first_value(record, ["タグ", "タグ（複数選択）", "タグ（複数）", "tags", "Tags"])
+    )
     images = parse_list(first_value(record, ["画像", "images", "image_urls"]))
     converted_images = []
     for image in images:
