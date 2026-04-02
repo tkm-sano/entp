@@ -15,7 +15,11 @@
       "インフルエンサー"
     ],
     "images": [
-      "/assets/images/models/sample.png"
+      "https://drive.google.com/uc?export=view&id=1QUUe7-ynA1hHRA-xgzzmrZ01v2lpkHOf",
+      "https://drive.google.com/uc?export=view&id=10DLvfpapbEfz-iNwFrGkTE-6Sdd7jGg2",
+      "https://drive.google.com/uc?export=view&id=1yjtIW-R9cz6FEnBx3gsPG3OoXGNeFEJm",
+      "https://drive.google.com/uc?export=view&id=1Pa_rGQBP2EXSQxWH-yMIsplqQkuoerDm",
+      "https://drive.google.com/uc?export=view&id=1ExXYAihxasDmWH39GsgrcpSdT2xigziU"
     ],
     "instagram_url": "https://www.instagram.com/",
     "x_url": "https://x.com/?lang=ja",
@@ -23,6 +27,51 @@
   },
   {
     "id": "model-2",
+    "layout": "model",
+    "name": "鈴木開斗",
+    "kana": "すずきかいと",
+    "gender": "male",
+    "height": 177,
+    "age": 23,
+    "university": "立教大学",
+    "skill_hobby": "筋トレ、ゴルフ",
+    "miss_contest_year": "24",
+    "tags": [
+      "インフルエンサー",
+      "ミスター"
+    ],
+    "images": [
+      "https://drive.google.com/uc?export=view&id=1wxan5OGi-9SOTFFZpn3YW-wK1tRnCgIL",
+      "https://drive.google.com/uc?export=view&id=1L1jpIKnsnoDGcS4LEJjf2fkZI-XlhocD"
+    ],
+    "instagram_url": "https://www.instagram.com/kaito_suzuki_official?igsh=d3A5M3F3Z2s4Y3E0&utm_source=qr",
+    "x_url": "",
+    "tiktok_url": ""
+  },
+  {
+    "id": "model-3",
+    "layout": "model",
+    "name": "鈴木開斗",
+    "kana": "スズキカイト",
+    "gender": "male",
+    "height": 177,
+    "age": 23,
+    "university": "立教",
+    "skill_hobby": "筋トレ",
+    "miss_contest_year": "24年度",
+    "tags": [
+      "筋肉"
+    ],
+    "images": [
+      "https://drive.google.com/uc?export=view&id=1jeN82OrJ_U8j9KKxutdyjoNy0VPybplV",
+      "https://drive.google.com/uc?export=view&id=1oz8_RxQMv_yymsJ6ScCgsI988IlcGGPu"
+    ],
+    "instagram_url": "",
+    "x_url": "",
+    "tiktok_url": ""
+  },
+  {
+    "id": "model-4",
     "layout": "model",
     "name": "鈴木開斗",
     "kana": "すずきかいと",
