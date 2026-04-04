@@ -6,8 +6,7 @@ gender: "male"
 height: 177
 age: 23
 university: "立教大学"
-hobby_1: "筋トレ"
-hobby_2: "ゴルフ"
+hobby_1: "筋トレ、ゴルフ"
 skill_hobby: "筋トレ / ゴルフ"
 miss_contest_year: "24"
 tags:
