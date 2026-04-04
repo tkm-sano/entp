@@ -4,6 +4,7 @@ title: MODEL DATABASE
 ---
 
 <section class="page-header">
+  <p class="page-header-eyebrow">MissConnect Curated Profiles</p>
   <h1>MODEL DATABASE</h1>
 </section>
 
