@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const ageMinSelect = document.querySelector('[data-filter-select="age-min"]');
   const ageMaxSelect = document.querySelector('[data-filter-select="age-max"]');
 
-  const PAGE_SIZE = 25;
+  const PAGE_SIZE = 18;
   let currentPage = 1;
   let isSheetOpen = false;
 
