@@ -11,9 +11,11 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 SHEET_NAME = "モデル一覧"
-DEFAULT_IMAGE = "/assets/images/models/sample.png"
 MODEL_PAGE_URL_HEADER = "個別ページURL"
 SITE_CONFIG_PATH = "_config.yml"
+
+MEDIA_URL_KEYS = ["url", "src", "path", "image", "source"]
+VIDEO_EXTENSIONS = (".mp4", ".mov", ".webm", ".m4v", ".ogv")
 
 
 def first_value(record, keys, default=""):
@@ -108,11 +110,40 @@ def parse_int(value, default=0):
     return int(match.group(0))
 
 
+def normalize_media_value(value):
+    if isinstance(value, dict):
+        normalized = {}
+        for key, val in value.items():
+            if val is None:
+                continue
+            text = str(val).strip()
+            if text == "":
+                continue
+            normalized[str(key).strip().lower()] = text
+        return normalized or None
+    text = str(value).strip()
+    return text if text else None
+
+
+def infer_media_type_from_url(url):
+    normalized = str(url).split("?", 1)[0].split("#", 1)[0].lower()
+    for ext in VIDEO_EXTENSIONS:
+        if normalized.endswith(ext):
+            return "video"
+    return None
+
+
+
+
 def parse_list(value):
     if value is None:
         return []
+
+    def normalize_items(items):
+        return [item for item in (normalize_media_value(v) for v in items) if item]
+
     if isinstance(value, list):
-        return [str(v).strip() for v in value if str(v).strip()]
+        return normalize_items(value)
     text = str(value).strip()
     if text == "":
         return []
@@ -122,12 +153,45 @@ def parse_list(value):
         try:
             parsed = json.loads(text)
             if isinstance(parsed, list):
-                return [str(v).strip() for v in parsed if str(v).strip()]
+                return normalize_items(parsed)
         except json.JSONDecodeError:
             pass
 
     parts = re.split(r"[,\n、;]+", text)
-    return [p.strip() for p in parts if p.strip()]
+    return normalize_items(parts)
+
+
+def build_media_entry(value):
+    media_meta = {}
+    url_candidate = None
+    if isinstance(value, dict):
+        media_meta = value
+        url_candidate = first_value(media_meta, MEDIA_URL_KEYS)
+    else:
+        url_candidate = str(value).strip()
+
+    if not url_candidate:
+        return None
+
+    converted_url = to_web_image_url(url_candidate)
+    if not converted_url:
+        return None
+
+    entry = {k: v for k, v in media_meta.items() if k not in MEDIA_URL_KEYS}
+    entry["url"] = converted_url
+
+    if "poster" in entry:
+        entry["poster"] = to_web_image_url(entry["poster"])
+
+    entry_type = entry.get("type")
+    if entry_type:
+        entry["type"] = entry_type.lower()
+    else:
+        inferred = infer_media_type_from_url(converted_url)
+        if inferred:
+            entry["type"] = inferred
+
+    return entry
 
 
 def extract_drive_file_id(url):
@@ -217,7 +281,23 @@ def to_front_matter(model):
                 continue
             lines.append(f"{key}:")
             for item in value:
-                lines.append(f"  - {yaml_scalar(item)}")
+                if isinstance(item, dict):
+                    prioritized_keys = ["url", "type", "poster", "alt"]
+                    seen = set()
+                    subitems = []
+                    for subkey in prioritized_keys:
+                        if subkey in item:
+                            subitems.append((subkey, item[subkey]))
+                            seen.add(subkey)
+                    for subkey, subvalue in item.items():
+                        if subkey not in seen:
+                            subitems.append((subkey, subvalue))
+
+                    for idx, (subkey, subvalue) in enumerate(subitems):
+                        indent = "  - " if idx == 0 else "    "
+                        lines.append(f"{indent}{subkey}: {yaml_scalar(subvalue)}")
+                else:
+                    lines.append(f"  - {yaml_scalar(item)}")
         else:
             lines.append(f"{key}: {yaml_scalar(value)}")
 
@@ -241,15 +321,13 @@ def build_model_record(record, index):
     tags = parse_list(
         first_value(record, ["タグ", "タグ（複数選択）", "タグ（複数）", "tags", "Tags"])
     )
-    images = parse_list(first_value(record, ["画像", "images", "image_urls"]))
-    converted_images = []
-    for image in images:
-        converted = to_web_image_url(image)
-        if converted:
-            converted_images.append(converted)
-    images = converted_images
-    if not images:
-        images = [DEFAULT_IMAGE]
+    raw_images = parse_list(first_value(record, ["画像", "images", "image_urls"]))
+    processed_images = []
+    for image in raw_images:
+        entry = build_media_entry(image)
+        if entry:
+            processed_images.append(entry)
+    images = processed_images
 
     skill_hobby = first_value(record, ["特技・趣味", "特技", "趣味", "skill_hobby", "skills_hobbies"])
     miss_contest_year = first_value(

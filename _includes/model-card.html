@@ -7,16 +7,17 @@
      data-tags="{{ include.model.tags | join: ',' | downcase | replace: ' ', '' }}"
      data-height="{{ include.model.height }}"
      data-age="{{ include.model.age }}">
-  {% assign card_image_src = include.model.images[0] %}
+  {% assign card_media_entry = include.model.images[0] %}
+  {% assign card_image_src = card_media_entry.url | default: card_media_entry %}
   {% assign card_image_srcset = '' %}
-  {% if include.model.images[0] contains 'drive.google.com/' %}
-    {% assign drive_id = include.model.images[0] | split: 'id=' | last | split: '&' | first %}
+  {% if card_image_src contains 'drive.google.com/' %}
+    {% assign drive_id = card_image_src | split: 'id=' | last | split: '&' | first %}
     {% assign drive_base = 'https://lh3.googleusercontent.com/d/' | append: drive_id %}
     {% assign card_image_src = drive_base | append: '=w700' %}
     {% assign card_image_srcset = drive_base | append: '=w700 1x, ' | append: drive_base | append: '=w1400 2x' %}
   {% endif %}
-  {% unless include.model.images[0] contains '://' %}
-    {% assign card_image_src = include.model.images[0] | relative_url %}
+  {% unless card_image_src contains '://' %}
+    {% assign card_image_src = card_image_src | relative_url %}
   {% endunless %}
 
   <a href="{{ include.model.url | relative_url }}">
