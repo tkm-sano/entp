@@ -43,14 +43,6 @@
               {% assign first_media_type = 'image' %}
             {% endif %}
           {% endif %}
-          {% if first_media_type == 'image' and first_media_src contains 'drive.google.com/' %}
-            {% assign first_drive_id = first_media_src | split: 'id=' | last | split: '&' | first %}
-            {% if first_drive_id != '' %}
-              {% assign first_drive_base = 'https://lh3.googleusercontent.com/d/' | append: first_drive_id %}
-              {% assign first_media_src = first_drive_base | append: '=w1200' %}
-              {% assign first_media_srcset = first_drive_base | append: '=w1200 1x, ' | append: first_drive_base | append: '=w2400 2x' %}
-            {% endif %}
-          {% endif %}
           {% unless first_media_src contains '://' %}
             {% assign first_media_src = first_media_src | relative_url %}
           {% endunless %}
@@ -92,14 +84,6 @@
                     {% assign media_type = 'video' %}
                   {% else %}
                     {% assign media_type = 'image' %}
-                  {% endif %}
-                {% endif %}
-                {% if media_type == 'image' and media_src contains 'drive.google.com/' %}
-                  {% assign drive_id = media_src | split: 'id=' | last | split: '&' | first %}
-                  {% if drive_id != '' %}
-                    {% assign drive_base = 'https://lh3.googleusercontent.com/d/' | append: drive_id %}
-                    {% assign media_src = drive_base | append: '=w1200' %}
-                    {% assign media_srcset = drive_base | append: '=w1200 1x, ' | append: drive_base | append: '=w2400 2x' %}
                   {% endif %}
                 {% endif %}
                 {% unless media_src contains '://' %}
