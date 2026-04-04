@@ -680,10 +680,14 @@ body {
   overflow-wrap: anywhere;
 }
 
+.model-profile-tags-inline {
+  display: block;
+}
+
 .model-tags {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   margin: 0;
 }

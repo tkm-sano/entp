@@ -151,6 +151,12 @@
                   <dd>{{ page.kana }}</dd>
                 </div>
               {% endif %}
+              {% if page.university %}
+                <div class="model-profile-item">
+                  <dt>大学名</dt>
+                  <dd>{{ page.university }}</dd>
+                </div>
+              {% endif %}
               <div class="model-profile-item">
                 <dt>年齢</dt>
                 <dd><span class="numeric-readable">{{ page.age }}</span>歳</dd>
@@ -161,19 +167,19 @@
               </div>
               {% if hobby_1 %}
                 <div class="model-profile-item">
-                  <dt>趣味1</dt>
+                  <dt>趣味①</dt>
                   <dd>{{ hobby_1 }}</dd>
                 </div>
               {% endif %}
               {% if hobby_2 %}
                 <div class="model-profile-item">
-                  <dt>趣味2</dt>
+                  <dt>趣味②</dt>
                   <dd>{{ hobby_2 }}</dd>
                 </div>
               {% endif %}
               {% if hobby_3 %}
                 <div class="model-profile-item">
-                  <dt>趣味3</dt>
+                  <dt>趣味③</dt>
                   <dd>{{ hobby_3 }}</dd>
                 </div>
               {% endif %}
@@ -189,18 +195,19 @@
                   <dd><span class="numeric-readable">{{ miss_contest_year }}</span></dd>
                 </div>
               {% endif %}
-            </dl>
-
-            {% if page.tags and page.tags.size > 0 %}
-              <div class="model-profile-tags">
-                <h2 class="model-section-heading">TAGS</h2>
-                <div class="model-tags" aria-label="タグ">
-                  {% for tag in page.tags %}
-                    <span class="model-tag">#{{ tag }}</span>
-                  {% endfor %}
+              {% if page.tags and page.tags.size > 0 %}
+                <div class="model-profile-item">
+                  <dt>TAGS</dt>
+                  <dd class="model-profile-tags-inline">
+                    <div class="model-tags" aria-label="タグ">
+                      {% for tag in page.tags %}
+                        <span class="model-tag">#{{ tag }}</span>
+                      {% endfor %}
+                    </div>
+                  </dd>
                 </div>
-              </div>
-            {% endif %}
+              {% endif %}
+            </dl>
 
             {% if instagram_url or x_url or tiktok_url %}
               <div class="model-profile-social">
