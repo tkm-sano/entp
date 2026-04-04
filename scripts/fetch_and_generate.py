@@ -12,6 +12,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 SHEET_NAME = "モデル一覧"
 MODEL_PAGE_URL_HEADER = "個別ページURL"
+MODEL_ID_HEADER = "モデルID"
 SITE_CONFIG_PATH = "_config.yml"
 MODEL_IMAGE_DIR = os.path.join("assets", "images", "models")
 MODEL_VIDEO_DIR = os.path.join("assets", "videos", "models")
@@ -74,6 +75,20 @@ def build_model_page_url(model_id, site_url, baseurl):
     return path
 
 
+def extract_model_id_from_page_url(url):
+    value = str(url).strip()
+    if not value:
+        return ""
+
+    parsed = urlparse(value)
+    path = parsed.path if parsed.scheme or parsed.netloc else value
+    match = re.search(r"/models/([^/]+)/?$", path)
+    if not match:
+        return ""
+
+    return slugify(match.group(1))
+
+
 def ensure_sheet_column(sheet, header_name):
     headers = sheet.row_values(1)
     for idx, header in enumerate(headers, start=1):
@@ -99,6 +114,22 @@ def update_model_page_urls(sheet, row_url_pairs):
     ]
     sheet.batch_update(updates, value_input_option="RAW")
     print(f"Updated {len(row_url_pairs)} URLs in sheet column '{MODEL_PAGE_URL_HEADER}'.")
+
+
+def update_model_ids(sheet, row_id_pairs):
+    if not row_id_pairs:
+        return
+
+    model_id_col = ensure_sheet_column(sheet, MODEL_ID_HEADER)
+    updates = [
+        {
+            "range": rowcol_to_a1(row, model_id_col),
+            "values": [[model_id]],
+        }
+        for row, model_id in row_id_pairs
+    ]
+    sheet.batch_update(updates, value_input_option="RAW")
+    print(f"Updated {len(row_id_pairs)} IDs in sheet column '{MODEL_ID_HEADER}'.")
 
 
 def parse_int(value, default=0):
@@ -366,6 +397,65 @@ def slugify(value):
     return value
 
 
+def build_model_match_keys(record):
+    keys = set()
+
+    def add(parts):
+        normalized = [slugify(part) for part in parts if str(part).strip()]
+        if normalized:
+            keys.add("|".join(normalized))
+
+    name = first_value(record, ["名前", "氏名", "name"])
+    kana = first_value(record, ["フリガナ", "ふりがな", "名前カナ", "かな", "カナ", "kana"])
+    university = first_value(record, ["大学", "university", "school"])
+    instagram_url = first_value(record, ["instagram_url", "instagram", "Instagram"])
+    x_url = first_value(record, ["x_url", "x", "X", "twitter_url", "twitter"])
+    tiktok_url = first_value(record, ["tiktok_url", "tiktok", "TikTok"])
+
+    add([name, kana, university])
+    add([name, university])
+    add([name, kana])
+    add([name])
+    add([instagram_url])
+    add([x_url])
+    add([tiktok_url])
+
+    return keys
+
+
+def load_existing_model_id_map(path=os.path.join("_data", "models.json")):
+    if not os.path.exists(path):
+        return {}
+
+    with open(path, "r", encoding="utf-8") as f:
+        try:
+            existing_models = json.load(f)
+        except json.JSONDecodeError:
+            return {}
+
+    id_map = {}
+    for model in existing_models:
+        model_id = slugify(model.get("id", ""))
+        if not model_id:
+            continue
+
+        candidate_records = [
+            {
+                "名前": model.get("name", ""),
+                "フリガナ": model.get("kana", ""),
+                "大学": model.get("university", ""),
+                "instagram_url": model.get("instagram_url", ""),
+                "x_url": model.get("x_url", ""),
+                "tiktok_url": model.get("tiktok_url", ""),
+            }
+        ]
+        for record in candidate_records:
+            for key in build_model_match_keys(record):
+                id_map.setdefault(key, model_id)
+
+    return id_map
+
+
 def yaml_scalar(value):
     if isinstance(value, bool):
         return "true" if value else "false"
@@ -432,14 +522,21 @@ def to_front_matter(model):
     return "\n".join(lines) + "\n"
 
 
-def build_model_record(record, index):
+def build_model_record(record, index, existing_model_id_map=None):
     name = first_value(record, ["名前", "氏名", "name"])
     kana = first_value(record, ["フリガナ", "ふりがな", "名前カナ", "かな", "カナ", "kana"])
     university = first_value(record, ["大学", "university", "school"])
-    model_id = first_value(record, ["モデルID", "model_id", "id"])
+    model_id = first_value(record, [MODEL_ID_HEADER, "model_id", "id"])
     if model_id:
         model_id = slugify(model_id)
-    else:
+    if not model_id:
+        model_id = extract_model_id_from_page_url(first_value(record, [MODEL_PAGE_URL_HEADER]))
+    if not model_id and existing_model_id_map:
+        for match_key in build_model_match_keys(record):
+            if match_key in existing_model_id_map:
+                model_id = existing_model_id_map[match_key]
+                break
+    if not model_id:
         model_id = slugify(f"{name}-{university}")
     if not model_id:
         model_id = f"model-{index}"
@@ -513,15 +610,17 @@ def main():
     sheet = client.open(SHEET_NAME).sheet1
     raw_records = sheet.get_all_records()
     site_url, baseurl = load_site_url_config()
+    existing_model_id_map = load_existing_model_id_map()
 
     models = []
     os.makedirs("_models", exist_ok=True)
     current_ids = set()
     used_ids = set()
+    row_id_pairs = []
     row_url_pairs = []
 
     for i, record in enumerate(raw_records, start=1):
-        model_id, model = build_model_record(record, i)
+        model_id, model = build_model_record(record, i, existing_model_id_map)
 
         # 重複時は連番サフィックスを付与
         base_id = model_id
@@ -534,6 +633,7 @@ def main():
         model["id"] = model_id
         current_ids.add(model_id)
         models.append(model)
+        row_id_pairs.append((i + 1, model_id))
         row_url_pairs.append((i + 1, build_model_page_url(model_id, site_url, baseurl)))
 
         filepath = f"_models/{model_id}.md"
@@ -544,6 +644,7 @@ def main():
     with open("_data/models.json", "w", encoding="utf-8") as f:
         json.dump(models, f, ensure_ascii=False, indent=2)
 
+    update_model_ids(sheet, row_id_pairs)
     update_model_page_urls(sheet, row_url_pairs)
 
     # シート0件時に既存ページを全削除しない安全策
