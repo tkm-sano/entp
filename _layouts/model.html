@@ -30,13 +30,16 @@
         {% if has_images %}
           {% assign first_media_raw = page.images[0] %}
           {% assign first_media_src = first_media_raw %}
-          {% assign first_media_srcset = '' %}
           {% assign first_media_type = '' %}
+          {% assign first_media_poster = '' %}
           {% if first_media_raw.url %}
             {% assign first_media_src = first_media_raw.url %}
           {% endif %}
           {% if first_media_raw.type %}
             {% assign first_media_type = first_media_raw.type | downcase %}
+          {% endif %}
+          {% if first_media_raw.poster %}
+            {% assign first_media_poster = first_media_raw.poster %}
           {% endif %}
           {% assign first_media_probe = first_media_src | downcase | split: '?' | first | split: '#' | first %}
           {% if first_media_type == '' %}
@@ -49,12 +52,18 @@
           {% unless first_media_src contains '://' %}
             {% assign first_media_src = first_media_src | relative_url %}
           {% endunless %}
+          {% if first_media_poster != '' %}
+            {% unless first_media_poster contains '://' %}
+              {% assign first_media_poster = first_media_poster | relative_url %}
+            {% endunless %}
+          {% endif %}
 
           <section class="model-media-panel" aria-label="モデルメディア">
             <div id="modelPreviewStage" class="model-main-image" data-preview-type="{{ first_media_type }}">
               {% if first_media_type == 'video' %}
                 <video id="modelPreviewVideo"
                        src="{{ first_media_src }}"
+                       {% if first_media_poster != '' %}poster="{{ first_media_poster }}"{% endif %}
                        controls
                        playsinline
                        preload="metadata"
@@ -62,7 +71,6 @@
               {% else %}
                 <img id="modelPreviewImage"
                      src="{{ first_media_src }}"
-                     {% if first_media_srcset != '' %}srcset="{{ first_media_srcset }}"{% endif %}
                      sizes="(max-width: 768px) 94vw, 440px"
                      loading="eager"
                      decoding="async"
@@ -73,13 +81,16 @@
             <div class="model-gallery">
               {% for media in page.images limit: 5 %}
                 {% assign media_src = media %}
-                {% assign media_srcset = '' %}
                 {% assign media_type = '' %}
+                {% assign media_poster = '' %}
                 {% if media.url %}
                   {% assign media_src = media.url %}
                 {% endif %}
                 {% if media.type %}
                   {% assign media_type = media.type | downcase %}
+                {% endif %}
+                {% if media.poster %}
+                  {% assign media_poster = media.poster %}
                 {% endif %}
                 {% assign media_probe = media_src | downcase | split: '?' | first | split: '#' | first %}
                 {% if media_type == '' %}
@@ -92,15 +103,21 @@
                 {% unless media_src contains '://' %}
                   {% assign media_src = media_src | relative_url %}
                 {% endunless %}
+                {% if media_poster != '' %}
+                  {% unless media_poster contains '://' %}
+                    {% assign media_poster = media_poster | relative_url %}
+                  {% endunless %}
+                {% endif %}
                 <button class="model-gallery-item{% if media_type == 'video' %} is-video{% endif %}"
                         type="button"
                         data-preview-src="{{ media_src }}"
                         data-preview-type="{{ media_type }}"
-                        {% if media_srcset != '' %}data-preview-srcset="{{ media_srcset }}"{% endif %}
+                        {% if media_poster != '' %}data-preview-poster="{{ media_poster }}"{% endif %}
                         aria-label="{{ page.name }} {{ forloop.index }}"
                         data-preview-alt="{{ page.name }} {{ forloop.index }}">
                   {% if media_type == 'video' %}
                     <video src="{{ media_src }}"
+                           {% if media_poster != '' %}poster="{{ media_poster }}"{% endif %}
                            muted
                            playsinline
                            preload="metadata"
@@ -108,7 +125,6 @@
                            aria-hidden="true"></video>
                   {% else %}
                     <img src="{{ media_src }}"
-                         {% if media_srcset != '' %}srcset="{{ media_srcset }}"{% endif %}
                          sizes="(max-width: 560px) 46vw, (max-width: 768px) 30vw, 180px"
                          loading="lazy"
                          decoding="async"
@@ -240,10 +256,13 @@
 
       if (!previewStage || triggers.length === 0) return;
 
-      const buildPreviewVideo = (src, label) => {
+      const buildPreviewVideo = (src, label, poster) => {
         const video = document.createElement("video");
         video.id = "modelPreviewVideo";
         video.src = src;
+        if (poster) {
+          video.poster = poster;
+        }
         video.controls = true;
         video.playsInline = true;
         video.preload = "metadata";
@@ -251,9 +270,12 @@
         return video;
       };
 
-      const buildThumbnailVideo = (src) => {
+      const buildThumbnailVideo = (src, poster) => {
         const video = document.createElement("video");
         video.src = src;
+        if (poster) {
+          video.poster = poster;
+        }
         video.muted = true;
         video.playsInline = true;
         video.preload = "metadata";
@@ -265,11 +287,10 @@
       const promoteTriggerToVideo = (trigger) => {
         if (trigger.dataset.previewType === "video") return;
         trigger.dataset.previewType = "video";
-        trigger.removeAttribute("data-preview-srcset");
         trigger.classList.add("is-video");
         const thumbnailImage = trigger.querySelector("img");
         if (thumbnailImage && trigger.dataset.previewSrc) {
-          thumbnailImage.replaceWith(buildThumbnailVideo(trigger.dataset.previewSrc));
+          thumbnailImage.replaceWith(buildThumbnailVideo(trigger.dataset.previewSrc, trigger.dataset.previewPoster));
         }
       };
 
@@ -279,18 +300,16 @@
 
         const nextType = trigger.dataset.previewType === "video" ? "video" : "image";
         const nextAlt = trigger.dataset.previewAlt || "モデルメディア";
+        const nextPoster = trigger.dataset.previewPoster || "";
 
         previewStage.textContent = "";
 
         if (nextType === "video") {
-          previewStage.appendChild(buildPreviewVideo(nextSrc, nextAlt));
+          previewStage.appendChild(buildPreviewVideo(nextSrc, nextAlt, nextPoster));
         } else {
           const image = document.createElement("img");
           image.id = "modelPreviewImage";
           image.src = nextSrc;
-          if (trigger.dataset.previewSrcset) {
-            image.srcset = trigger.dataset.previewSrcset;
-          }
           image.sizes = "(max-width: 768px) 94vw, 440px";
           image.loading = "eager";
           image.decoding = "async";

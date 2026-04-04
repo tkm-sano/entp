@@ -13,9 +13,12 @@ from oauth2client.service_account import ServiceAccountCredentials
 SHEET_NAME = "モデル一覧"
 MODEL_PAGE_URL_HEADER = "個別ページURL"
 SITE_CONFIG_PATH = "_config.yml"
+MODEL_IMAGE_DIR = os.path.join("assets", "images", "models")
+MODEL_VIDEO_DIR = os.path.join("assets", "videos", "models")
 
 MEDIA_URL_KEYS = ["url", "src", "path", "image", "source"]
 VIDEO_EXTENSIONS = (".mp4", ".mov", ".webm", ".m4v", ".ogv")
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif")
 
 
 def first_value(record, keys, default=""):
@@ -168,6 +171,73 @@ def infer_media_type_from_url(url):
             return "video"
     return None
 
+
+def sort_key_for_path(path):
+    parts = re.split(r"(\d+)", os.path.basename(path).lower())
+    key = []
+    for part in parts:
+        if part.isdigit():
+            key.append(int(part))
+        else:
+            key.append(part)
+    return key
+
+
+def to_site_asset_path(path):
+    normalized = str(path).replace(os.sep, "/").lstrip("./")
+    if not normalized.startswith("assets/"):
+        return f"/{normalized}"
+    return f"/{normalized}"
+
+
+def find_matching_poster(video_path):
+    base_dir = os.path.dirname(video_path)
+    stem = os.path.splitext(os.path.basename(video_path))[0]
+    candidates = []
+    for ext in IMAGE_EXTENSIONS:
+        candidates.append(os.path.join(base_dir, f"{stem}-poster{ext}"))
+        candidates.append(os.path.join(base_dir, f"{stem}_poster{ext}"))
+    poster_dir = os.path.join(MODEL_IMAGE_DIR, os.path.basename(base_dir))
+    for ext in IMAGE_EXTENSIONS:
+        candidates.append(os.path.join(poster_dir, f"{stem}-poster{ext}"))
+        candidates.append(os.path.join(poster_dir, f"{stem}_poster{ext}"))
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return to_site_asset_path(candidate)
+    return ""
+
+
+def load_assets_media_entries(model_id):
+    entries = []
+    image_dir = os.path.join(MODEL_IMAGE_DIR, model_id)
+    video_dir = os.path.join(MODEL_VIDEO_DIR, model_id)
+
+    image_paths = []
+    for ext in IMAGE_EXTENSIONS:
+        image_paths.extend(glob.glob(os.path.join(image_dir, f"*{ext}")))
+        image_paths.extend(glob.glob(os.path.join(image_dir, f"*{ext.upper()}")))
+    for path in sorted(set(image_paths), key=sort_key_for_path):
+        lower_name = os.path.basename(path).lower()
+        if "-poster." in lower_name or "_poster." in lower_name:
+            continue
+        entries.append({"url": to_site_asset_path(path)})
+
+    video_paths = []
+    for ext in VIDEO_EXTENSIONS:
+        video_paths.extend(glob.glob(os.path.join(video_dir, f"*{ext}")))
+        video_paths.extend(glob.glob(os.path.join(video_dir, f"*{ext.upper()}")))
+    for path in sorted(set(video_paths), key=sort_key_for_path):
+        entry = {
+            "url": to_site_asset_path(path),
+            "type": "video",
+        }
+        poster = find_matching_poster(path)
+        if poster:
+            entry["poster"] = poster
+        entries.append(entry)
+
+    return entries
+
 def parse_list(value):
     if value is None:
         return []
@@ -267,6 +337,10 @@ def to_web_image_url(url):
     if not value:
         return ""
 
+    if value.startswith("/assets/") or value.startswith("assets/"):
+        normalized = value if value.startswith("/") else f"/{value}"
+        return normalized
+
     file_id = extract_drive_file_id(value)
     if not file_id:
         return value
@@ -362,8 +436,11 @@ def build_model_record(record, index):
     name = first_value(record, ["名前", "氏名", "name"])
     kana = first_value(record, ["フリガナ", "ふりがな", "名前カナ", "かな", "カナ", "kana"])
     university = first_value(record, ["大学", "university", "school"])
-    # モデルIDは常に自動生成（シート入力値は使わない）
-    model_id = slugify(f"{name}-{university}")
+    model_id = first_value(record, ["モデルID", "model_id", "id"])
+    if model_id:
+        model_id = slugify(model_id)
+    else:
+        model_id = slugify(f"{name}-{university}")
     if not model_id:
         model_id = f"model-{index}"
 
@@ -380,7 +457,7 @@ def build_model_record(record, index):
         entry = build_media_entry(image)
         if entry:
             processed_images.append(entry)
-    images = processed_images
+    images = processed_images if processed_images else load_assets_media_entries(model_id)
 
     hobby_1 = first_value(record, ["趣味①（必須）"])
     hobby_2 = first_value(record, ["趣味②（任意）"])

@@ -8,21 +8,43 @@
      data-height="{{ include.model.height }}"
      data-age="{{ include.model.age }}">
   {% assign card_media_entry = include.model.images[0] %}
-  {% assign card_image_src = card_media_entry.url | default: card_media_entry %}
-  {% assign card_image_srcset = '' %}
-  {% unless card_image_src contains '://' %}
-    {% assign card_image_src = card_image_src | relative_url %}
+  {% assign card_media_src = card_media_entry.url | default: card_media_entry %}
+  {% assign card_media_type = card_media_entry.type | default: '' | downcase %}
+  {% assign card_media_poster = card_media_entry.poster | default: '' %}
+  {% assign card_media_probe = card_media_src | downcase | split: '?' | first | split: '#' | first %}
+  {% if card_media_type == '' %}
+    {% if card_media_probe contains '.mp4' or card_media_probe contains '.webm' or card_media_probe contains '.mov' or card_media_probe contains '.m4v' or card_media_probe contains '.ogv' %}
+      {% assign card_media_type = 'video' %}
+    {% else %}
+      {% assign card_media_type = 'image' %}
+    {% endif %}
+  {% endif %}
+  {% unless card_media_src contains '://' %}
+    {% assign card_media_src = card_media_src | relative_url %}
   {% endunless %}
+  {% if card_media_poster != '' %}
+    {% unless card_media_poster contains '://' %}
+      {% assign card_media_poster = card_media_poster | relative_url %}
+    {% endunless %}
+  {% endif %}
 
   <a href="{{ include.model.url | relative_url }}">
 
     <div class="image-wrapper">
-      <img src="{{ card_image_src }}"
-           {% if card_image_srcset != '' %}srcset="{{ card_image_srcset }}"{% endif %}
-           sizes="(max-width: 480px) 94vw, (max-width: 768px) 45vw, 220px"
-           loading="lazy"
-           decoding="async"
-           alt="{{ include.model.name }}">
+      {% if card_media_type == 'video' %}
+        <video src="{{ card_media_src }}"
+               {% if card_media_poster != '' %}poster="{{ card_media_poster }}"{% endif %}
+               muted
+               playsinline
+               preload="metadata"
+               aria-label="{{ include.model.name }}"></video>
+      {% else %}
+        <img src="{{ card_media_src }}"
+             sizes="(max-width: 480px) 94vw, (max-width: 768px) 45vw, 220px"
+             loading="lazy"
+             decoding="async"
+             alt="{{ include.model.name }}">
+      {% endif %}
     </div>
 
     <div class="model-info">
