@@ -8,9 +8,6 @@ age: 23
 university: "SNS大学"
 hobby_1: "カラオケ"
 skill_hobby: "カラオケ"
-tags:
-  - "ミス"
-  - "インフルエンサー"
 instagram_url: "https://www.instagram.com/"
 x_url: "https://x.com/?lang=ja"
 tiktok_url: "https://www.tiktok.com/"

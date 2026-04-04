@@ -9,8 +9,6 @@ university: "立教"
 hobby_1: "筋トレ"
 skill_hobby: "筋トレ"
 miss_contest_year: "24年度"
-tags:
-  - "筋肉"
 images:
   - url: "/assets/images/models/kaito-suzuki/1-kaito.jpeg"
   - url: "/assets/images/models/kaito-suzuki/2-kaito.jpeg"
