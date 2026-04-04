@@ -352,7 +352,8 @@ body {
   padding: 12px;
 }
 
-.filter-select-group label {
+.filter-select-group label,
+.filter-select-group .filter-group-label {
   width: 100%;
   margin: 0;
   font-size: 0.78rem;
@@ -1159,7 +1160,8 @@ body {
     padding: 9px 10px;
   }
 
-  .filters-sheet .filter-select-group label {
+  .filters-sheet .filter-select-group label,
+  .filters-sheet .filter-select-group .filter-group-label {
     font-size: 16px !important;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -1242,7 +1244,8 @@ body {
     padding: 10px;
   }
 
-  .filter-select-group label {
+  .filter-select-group label,
+  .filter-select-group .filter-group-label {
     margin-bottom: 2px;
   }
 

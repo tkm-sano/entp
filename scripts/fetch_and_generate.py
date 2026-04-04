@@ -121,7 +121,43 @@ def normalize_media_value(value):
                 continue
             normalized[str(key).strip().lower()] = text
         return normalized or None
+
     text = str(value).strip()
+    if text.startswith("{") and text.endswith("}"):
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, dict):
+                return normalize_media_value(parsed)
+        except json.JSONDecodeError:
+            pass
+
+    prefixed_match = re.match(r"^(image|video)\s*:\s*(.+)$", text, re.IGNORECASE)
+    if prefixed_match:
+        return {
+            "type": prefixed_match.group(1).lower(),
+            "url": prefixed_match.group(2).strip(),
+        }
+
+    if "|" in text and "=" in text:
+        maybe_dict = {}
+        valid = True
+        for part in text.split("|"):
+            segment = part.strip()
+            if segment == "":
+                continue
+            if "=" not in segment:
+                valid = False
+                break
+            key, val = segment.split("=", 1)
+            key = key.strip().lower()
+            val = val.strip()
+            if key == "" or val == "":
+                valid = False
+                break
+            maybe_dict[key] = val
+        if valid and maybe_dict:
+            return normalize_media_value(maybe_dict)
+
     return text if text else None
 
 
@@ -131,9 +167,6 @@ def infer_media_type_from_url(url):
         if normalized.endswith(ext):
             return "video"
     return None
-
-
-
 
 def parse_list(value):
     if value is None:
@@ -192,6 +225,23 @@ def build_media_entry(value):
             entry["type"] = inferred
 
     return entry
+
+
+def combine_hobbies(raw_values):
+    values = []
+    seen = set()
+    for value in raw_values:
+        if not value:
+            continue
+        for item in parse_list(value):
+            if isinstance(item, dict):
+                continue
+            text = str(item).strip()
+            if text == "" or text in seen:
+                continue
+            seen.add(text)
+            values.append(text)
+    return " / ".join(values)
 
 
 def extract_drive_file_id(url):
@@ -260,6 +310,9 @@ def to_front_matter(model):
         "height",
         "age",
         "university",
+        "hobby_1",
+        "hobby_2",
+        "hobby_3",
         "skill_hobby",
         "miss_contest_year",
         "tags",
@@ -307,7 +360,7 @@ def to_front_matter(model):
 
 def build_model_record(record, index):
     name = first_value(record, ["名前", "氏名", "name"])
-    kana = first_value(record, ["ふりがな", "名前カナ", "かな", "カナ", "kana"])
+    kana = first_value(record, ["フリガナ", "ふりがな", "名前カナ", "かな", "カナ", "kana"])
     university = first_value(record, ["大学", "university", "school"])
     # モデルIDは常に自動生成（シート入力値は使わない）
     model_id = slugify(f"{name}-{university}")
@@ -321,7 +374,7 @@ def build_model_record(record, index):
     tags = parse_list(
         first_value(record, ["タグ", "タグ（複数選択）", "タグ（複数）", "tags", "Tags"])
     )
-    raw_images = parse_list(first_value(record, ["画像", "images", "image_urls"]))
+    raw_images = parse_list(first_value(record, ["画像・動画", "画像", "images", "image_urls"]))
     processed_images = []
     for image in raw_images:
         entry = build_media_entry(image)
@@ -329,7 +382,17 @@ def build_model_record(record, index):
             processed_images.append(entry)
     images = processed_images
 
-    skill_hobby = first_value(record, ["特技・趣味", "特技", "趣味", "skill_hobby", "skills_hobbies"])
+    hobby_1 = first_value(record, ["趣味①（必須）"])
+    hobby_2 = first_value(record, ["趣味②（任意）"])
+    hobby_3 = first_value(record, ["趣味③（任意）"])
+    skill_hobby = combine_hobbies(
+        [
+            hobby_1,
+            hobby_2,
+            hobby_3,
+            first_value(record, ["特技・趣味", "特技", "趣味", "skill_hobby", "skills_hobbies"]),
+        ]
+    )
     miss_contest_year = first_value(
         record,
         ["ミスコン出場年度", "出場年度", "miss_contest_year", "contest_year"],
@@ -348,6 +411,9 @@ def build_model_record(record, index):
         "height": height,
         "age": age,
         "university": university,
+        "hobby_1": hobby_1,
+        "hobby_2": hobby_2,
+        "hobby_3": hobby_3,
         "skill_hobby": skill_hobby,
         "miss_contest_year": miss_contest_year,
         "tags": tags,

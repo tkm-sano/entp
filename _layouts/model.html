@@ -14,6 +14,9 @@
 
     <main class="site-main model-detail-main">
       {% assign skill_hobby = page.skill_hobby | default: page.specialty_hobby | default: page.hobby %}
+      {% assign hobby_1 = page.hobby_1 %}
+      {% assign hobby_2 = page.hobby_2 %}
+      {% assign hobby_3 = page.hobby_3 %}
       {% assign miss_contest_year = page.miss_contest_year | default: page.misscontest_year %}
       {% assign instagram_url = page.instagram_url | default: page.instagram %}
       {% assign x_url = page.x_url | default: page.x | default: page.twitter_url | default: page.twitter %}
@@ -140,7 +143,25 @@
                 <dt>身長</dt>
                 <dd><span class="numeric-readable">{{ page.height }}</span>cm</dd>
               </div>
-              {% if skill_hobby %}
+              {% if hobby_1 %}
+                <div class="model-profile-item">
+                  <dt>趣味1</dt>
+                  <dd>{{ hobby_1 }}</dd>
+                </div>
+              {% endif %}
+              {% if hobby_2 %}
+                <div class="model-profile-item">
+                  <dt>趣味2</dt>
+                  <dd>{{ hobby_2 }}</dd>
+                </div>
+              {% endif %}
+              {% if hobby_3 %}
+                <div class="model-profile-item">
+                  <dt>趣味3</dt>
+                  <dd>{{ hobby_3 }}</dd>
+                </div>
+              {% endif %}
+              {% if skill_hobby and hobby_1 == blank and hobby_2 == blank and hobby_3 == blank %}
                 <div class="model-profile-item">
                   <dt>特技・趣味</dt>
                   <dd>{{ skill_hobby }}</dd>
