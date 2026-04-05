@@ -58,14 +58,6 @@ body {
   z-index: 1;
 }
 
-.site-main::before {
-  content: "";
-  position: fixed;
-  inset: 20px;
-  border: 1px solid rgba(17, 17, 17, 0.05);
-  pointer-events: none;
-}
-
 .site-wrapper .site-main {
   width: 100%;
   margin: 0;
@@ -215,7 +207,7 @@ body {
 .model-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 42px 40px;
+  gap: 52px 48px;
   margin: 34px auto 0;
   align-items: start;
   padding: 0 16px;
@@ -313,21 +305,21 @@ body {
 @media (max-width: 1200px) {
   .model-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 34px 28px;
+    gap: 42px 34px;
   }
 }
 
 @media (max-width: 992px) {
   .model-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 28px 20px;
+    gap: 34px 26px;
   }
 }
 
 @media (max-width: 768px) {
   .model-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px 14px;
+    gap: 22px 18px;
     padding: 0 12px;
   }
 }
@@ -1056,7 +1048,7 @@ body {
   }
 
   .model-grid {
-    gap: 24px;
+    gap: 34px 26px;
   }
 
   .model-gallery {
@@ -1373,15 +1365,16 @@ body {
     grid-auto-flow: row;
     grid-auto-columns: auto;
     margin-top: 16px;
-    gap: 18px 14px;
+    gap: 22px 20px;
     overflow-x: visible;
-    padding: 0 12px;
+    padding: 0 14px;
   }
 
   .model-card {
-    width: 100%;
-    max-width: none;
+    width: calc(100% - 4px);
+    max-width: 100%;
     padding: 8px 8px 10px;
+    margin: 0 auto;
     border: 1px solid rgba(17, 17, 17, 0.08);
     background: rgba(255, 255, 255, 0.78);
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
@@ -1621,8 +1614,8 @@ body {
 @media (max-width: 380px) {
   .model-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px 10px;
-    padding: 0 10px;
+    gap: 18px 16px;
+    padding: 0 12px;
   }
 
   .model-info h3 {
