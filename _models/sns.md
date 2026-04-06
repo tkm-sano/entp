@@ -4,7 +4,7 @@ name: "鈴木花子"
 kana: "すずきはなこ"
 gender: "female"
 height: 160
-age: 23
+age: 0
 university: "SNS大学"
 hobby_1: "カラオケ"
 skill_hobby: "カラオケ"

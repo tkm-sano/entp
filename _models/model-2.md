@@ -4,7 +4,7 @@ name: "鈴木開斗"
 kana: "すずきかいと"
 gender: "male"
 height: 177
-age: 23
+age: 0
 university: "立教大学"
 hobby_1: "筋トレ、ゴルフ"
 skill_hobby: "筋トレ / ゴルフ"
