@@ -24,12 +24,65 @@ IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif")
 GITKEEP_FILENAME = ".gitkeep"
 
 
+def normalize_lookup_text(value):
+    normalized = unicodedata.normalize("NFKC", str(value))
+    return re.sub(r"\s+", "", normalized).strip()
+
+
+def candidate_header_keys(value):
+    raw = unicodedata.normalize("NFKC", str(value)).strip()
+    if raw == "":
+        return []
+
+    candidates = [raw]
+    lines = [line.strip() for line in raw.splitlines() if line.strip()]
+    if lines:
+        candidates.append(lines[0])
+
+    expanded = []
+    for candidate in candidates:
+        expanded.append(candidate)
+        if "※" in candidate:
+            expanded.append(candidate.split("※", 1)[0].strip())
+
+    normalized_candidates = []
+    seen = set()
+    for candidate in expanded:
+        normalized = normalize_lookup_text(candidate)
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            normalized_candidates.append(normalized)
+
+    return normalized_candidates
+
+
+def clean_record_value(value):
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
 def first_value(record, keys, default=""):
     for key in keys:
         if key in record and record[key] is not None:
-            value = str(record[key]).strip()
+            value = clean_record_value(record[key])
             if value != "":
                 return value
+
+    normalized_items = []
+    for record_key, record_value in record.items():
+        value = clean_record_value(record_value)
+        if value == "":
+            continue
+        normalized_items.append((set(candidate_header_keys(record_key)), value))
+
+    for key in keys:
+        key_candidates = candidate_header_keys(key)
+        for key_candidate in key_candidates:
+            for record_candidates, value in normalized_items:
+                if key_candidate in record_candidates:
+                    return value
+
     return default
 
 
@@ -217,6 +270,67 @@ def extract_instagram_username(value):
         return ""
 
     return username.lstrip("@")
+
+
+def extract_x_username(value):
+    text = str(value).strip()
+    if text == "":
+        return ""
+
+    if "x.com" not in text and "twitter.com" not in text:
+        return text.lstrip("@")
+
+    parsed = urlparse(text)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if not path_parts:
+        return ""
+
+    username = path_parts[0].lstrip("@")
+    if username.lower() in {"home", "explore", "search", "messages", "notifications", "settings", "i", "intent"}:
+        return ""
+
+    return username
+
+
+def extract_tiktok_username(value):
+    text = str(value).strip()
+    if text == "":
+        return ""
+
+    if "tiktok.com" not in text:
+        return text.lstrip("@")
+
+    parsed = urlparse(text)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if not path_parts:
+        return ""
+
+    username = path_parts[0].lstrip("@")
+    if username.lower() in {"discover", "tag", "music", "foryou", "following"}:
+        return ""
+
+    return username
+
+
+def build_instagram_url(value):
+    username = extract_instagram_username(value)
+    if not username:
+        return ""
+    return f"https://www.instagram.com/{username}/"
+
+
+def build_x_url(value):
+    username = extract_x_username(value)
+    if not username:
+        return ""
+    return f"https://x.com/{username}"
+
+
+def build_tiktok_url(value):
+    username = extract_tiktok_username(value)
+    if not username:
+        return ""
+    return f"https://www.tiktok.com/@{username}"
 
 
 def is_hidden_model(record):
@@ -527,16 +641,42 @@ def build_model_match_keys(record):
     kana = first_value(record, ["フリガナ", "ふりがな", "名前カナ", "かな", "カナ", "kana"])
     university = first_value(record, ["大学", "university", "school"])
     instagram_url = first_value(record, ["instagram_url", "instagram", "Instagram"])
+    instagram_username = first_value(
+        record,
+        ["instagram_username", "Instagramユーザーネーム", "インスタのユーザーネーム", "インスタユーザーネーム"],
+    )
+    if not instagram_username:
+        instagram_username = extract_instagram_username(instagram_url)
+
     x_url = first_value(record, ["x_url", "x", "X", "twitter_url", "twitter"])
+    x_username = first_value(
+        record,
+        ["x_username", "Xユーザーネーム", "twitter_username", "Twitterユーザーネーム"],
+    )
+    if not x_username:
+        x_username = extract_x_username(x_url)
+
     tiktok_url = first_value(record, ["tiktok_url", "tiktok", "TikTok"])
+    tiktok_username = first_value(
+        record,
+        ["tiktok_username", "TikTokユーザーネーム", "Tiktokユーザーネーム"],
+    )
+    if not tiktok_username:
+        tiktok_username = extract_tiktok_username(tiktok_url)
 
     add([name, kana, university])
     add([name, university])
     add([name, kana])
     add([name])
     add([instagram_url])
+    add([instagram_username])
+    add([build_instagram_url(instagram_username)])
     add([x_url])
+    add([x_username])
+    add([build_x_url(x_username)])
     add([tiktok_url])
+    add([tiktok_username])
+    add([build_tiktok_url(tiktok_username)])
 
     return keys
 
@@ -677,9 +817,9 @@ def build_model_record(record, index, existing_model_id_map=None):
             processed_images.append(entry)
     images = merge_media_entries(processed_images, load_assets_media_entries(model_id))
 
-    hobby_1 = first_value(record, ["趣味①（必須）"])
-    hobby_2 = first_value(record, ["趣味②（任意）"])
-    hobby_3 = first_value(record, ["趣味③（任意）"])
+    hobby_1 = first_value(record, ["趣味・特技①（必須）", "趣味①（必須）"])
+    hobby_2 = first_value(record, ["趣味・特技②（任意）", "趣味②（任意）"])
+    hobby_3 = first_value(record, ["趣味・特技③（任意）", "趣味③（任意）"])
     skill_hobby = combine_hobbies(
         [
             hobby_1,
@@ -693,15 +833,27 @@ def build_model_record(record, index, existing_model_id_map=None):
         ["ミスコン出場年度", "出場年度", "miss_contest_year", "contest_year"],
     )
 
-    instagram_url = first_value(record, ["instagram_url", "instagram", "Instagram"])
     instagram_username = first_value(
         record,
         ["instagram_username", "Instagramユーザーネーム", "インスタのユーザーネーム", "インスタユーザーネーム"],
     )
-    if not instagram_username:
-        instagram_username = extract_instagram_username(instagram_url)
+    instagram_url = first_value(record, ["instagram_url", "instagram", "Instagram"])
+    instagram_username = extract_instagram_username(instagram_username or instagram_url)
+    instagram_url = build_instagram_url(instagram_url or instagram_username)
+
+    x_username = first_value(
+        record,
+        ["x_username", "Xユーザーネーム", "twitter_username", "Twitterユーザーネーム"],
+    )
     x_url = first_value(record, ["x_url", "x", "X", "twitter_url", "twitter"])
+    x_url = build_x_url(x_url or x_username)
+
+    tiktok_username = first_value(
+        record,
+        ["tiktok_username", "TikTokユーザーネーム", "Tiktokユーザーネーム"],
+    )
     tiktok_url = first_value(record, ["tiktok_url", "tiktok", "TikTok"])
+    tiktok_url = build_tiktok_url(tiktok_url or tiktok_username)
 
     model = {
         "id": model_id,
