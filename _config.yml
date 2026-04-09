@@ -34,6 +34,7 @@ defaults:
 exclude:
   - scripts/
   - .github/
+  - vendor/
   - .jekyll-cache/
   - _site/
   - _models/.jekyll-cache/
