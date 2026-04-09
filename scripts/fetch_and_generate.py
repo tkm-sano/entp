@@ -17,6 +17,7 @@ MODEL_ID_HEADER = "モデルID"
 SITE_CONFIG_PATH = "_config.yml"
 MODEL_IMAGE_DIR = os.path.join("assets", "images", "models")
 MODEL_VIDEO_DIR = os.path.join("assets", "videos", "models")
+RUN_SUMMARY_PATH = os.path.join(".github", "tmp", "update-models-script-summary.json")
 
 MEDIA_URL_KEYS = ["url", "src", "path", "image", "source"]
 VIDEO_EXTENSIONS = (".mp4", ".mov", ".webm", ".m4v", ".ogv")
@@ -467,13 +468,15 @@ def load_assets_media_entries(model_id):
 def ensure_model_image_dir(model_id):
     model_image_dir = os.path.join(MODEL_IMAGE_DIR, model_id)
     os.makedirs(model_image_dir, exist_ok=True)
+    created_files = []
 
     gitkeep_path = os.path.join(model_image_dir, GITKEEP_FILENAME)
     if not os.path.exists(gitkeep_path):
         with open(gitkeep_path, "w", encoding="utf-8") as f:
             f.write("")
+        created_files.append(gitkeep_path.replace(os.sep, "/"))
 
-    return model_image_dir
+    return model_image_dir, created_files
 
 
 def media_entry_key(entry):
@@ -880,73 +883,223 @@ def build_model_record(record, index, existing_model_id_map=None):
     return model_id, model
 
 
+def write_run_summary(summary, path=RUN_SUMMARY_PATH):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+
+
+def append_created_file(summary, path):
+    normalized = str(path).replace(os.sep, "/")
+    if normalized not in summary["created_files"]:
+        summary["created_files"].append(normalized)
+
+
+def append_failed_target(summary, target):
+    cleaned = {}
+    for key, value in target.items():
+        if value in ("", None, [], {}):
+            continue
+        cleaned[key] = value
+    summary["failed_targets"].append(cleaned)
+
+
 def main():
+    summary = {
+        "status": "started",
+        "phase": "initializing",
+        "sheet_name": SHEET_NAME,
+        "total_sheet_rows": 0,
+        "visible_models": 0,
+        "hidden_models": 0,
+        "model_pages_written": 0,
+        "sheet_model_id_updates": 0,
+        "sheet_model_page_url_updates": 0,
+        "written_model_ids": [],
+        "new_model_ids": [],
+        "deleted_model_ids": [],
+        "created_files": [],
+        "failed_targets": [],
+        "delete_guard_triggered": False,
+    }
+    current_target = {
+        "type": "workflow",
+        "stage": "initializing",
+    }
+
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive",
     ]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
-    client = gspread.authorize(creds)
+    try:
+        summary["phase"] = "loading_credentials"
+        current_target = {
+            "type": "credentials",
+            "stage": summary["phase"],
+            "file": "creds.json",
+        }
+        creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+        client = gspread.authorize(creds)
 
-    sheet = client.open(SHEET_NAME).sheet1
-    raw_records = sheet.get_all_records()
-    site_url, baseurl = load_site_url_config()
-    existing_model_id_map = load_existing_model_id_map()
+        summary["phase"] = "opening_sheet"
+        current_target = {
+            "type": "sheet",
+            "stage": summary["phase"],
+            "sheet_name": SHEET_NAME,
+        }
+        sheet = client.open(SHEET_NAME).sheet1
+        raw_records = sheet.get_all_records()
+        summary["total_sheet_rows"] = len(raw_records)
 
-    models = []
-    os.makedirs("_models", exist_ok=True)
-    os.makedirs(MODEL_IMAGE_DIR, exist_ok=True)
-    current_ids = set()
-    used_ids = set()
-    row_id_pairs = []
-    row_url_pairs = []
+        summary["phase"] = "loading_existing_state"
+        current_target = {
+            "type": "state",
+            "stage": summary["phase"],
+            "file": "_data/models.json",
+        }
+        site_url, baseurl = load_site_url_config()
+        existing_model_id_map = load_existing_model_id_map()
+        existing_model_ids = {
+            os.path.splitext(os.path.basename(path))[0] for path in glob.glob("_models/*.md")
+        }
 
-    for i, record in enumerate(raw_records, start=1):
-        if is_hidden_model(record):
-            row_id_pairs.append((i + 1, ""))
-            row_url_pairs.append((i + 1, ""))
-            continue
+        models = []
+        os.makedirs("_models", exist_ok=True)
+        os.makedirs(MODEL_IMAGE_DIR, exist_ok=True)
+        current_ids = set()
+        used_ids = set()
+        row_id_pairs = []
+        row_url_pairs = []
 
-        model_id, model = build_model_record(record, i, existing_model_id_map)
+        summary["phase"] = "processing_records"
+        for i, record in enumerate(raw_records, start=1):
+            sheet_row = i + 1
+            current_target = {
+                "type": "model",
+                "stage": summary["phase"],
+                "sheet_row": sheet_row,
+                "name": first_value(record, ["名前", "氏名", "name"]),
+                "university": first_value(record, ["大学", "university", "school"]),
+            }
+            if is_hidden_model(record):
+                summary["hidden_models"] += 1
+                row_id_pairs.append((sheet_row, ""))
+                row_url_pairs.append((sheet_row, ""))
+                continue
 
-        # 重複時は連番サフィックスを付与
-        base_id = model_id
-        n = 2
-        while model_id in used_ids:
-            model_id = f"{base_id}-{n}"
-            n += 1
-        used_ids.add(model_id)
+            model_id, model = build_model_record(record, i, existing_model_id_map)
 
-        model["id"] = model_id
-        current_ids.add(model_id)
-        models.append(model)
-        row_id_pairs.append((i + 1, model_id))
-        row_url_pairs.append((i + 1, build_model_page_url(model_id, site_url, baseurl)))
+            # 重複時は連番サフィックスを付与
+            base_id = model_id
+            n = 2
+            while model_id in used_ids:
+                model_id = f"{base_id}-{n}"
+                n += 1
+            used_ids.add(model_id)
 
-        ensure_model_image_dir(model_id)
+            model["id"] = model_id
+            current_ids.add(model_id)
+            models.append(model)
+            row_id_pairs.append((sheet_row, model_id))
+            row_url_pairs.append((sheet_row, build_model_page_url(model_id, site_url, baseurl)))
 
-        filepath = f"_models/{model_id}.md"
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(to_front_matter(model))
+            current_target = {
+                "type": "model",
+                "stage": "ensuring_image_dir",
+                "sheet_row": sheet_row,
+                "model_id": model_id,
+                "name": model.get("name", ""),
+                "file": f"{MODEL_IMAGE_DIR}/{model_id}/{GITKEEP_FILENAME}",
+            }
+            _, created_files = ensure_model_image_dir(model_id)
+            for path in created_files:
+                append_created_file(summary, path)
 
-    os.makedirs("_data", exist_ok=True)
-    with open("_data/models.json", "w", encoding="utf-8") as f:
-        json.dump(models, f, ensure_ascii=False, indent=2)
+            filepath = f"_models/{model_id}.md"
+            current_target = {
+                "type": "model",
+                "stage": "writing_model_page",
+                "sheet_row": sheet_row,
+                "model_id": model_id,
+                "name": model.get("name", ""),
+                "file": filepath,
+            }
+            file_already_exists = os.path.exists(filepath)
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(to_front_matter(model))
+            if not file_already_exists:
+                append_created_file(summary, filepath)
 
-    update_model_ids(sheet, row_id_pairs)
-    update_model_page_urls(sheet, row_url_pairs)
+            summary["visible_models"] += 1
+            summary["model_pages_written"] += 1
+            summary["written_model_ids"].append(model_id)
+            if model_id not in existing_model_ids:
+                summary["new_model_ids"].append(model_id)
 
-    # シート0件時に既存ページを全削除しない安全策
-    if not raw_records:
-        print("No records found. Skip deleting existing model files.")
-        return
+        summary["phase"] = "writing_models_json"
+        current_target = {
+            "type": "file",
+            "stage": summary["phase"],
+            "file": "_data/models.json",
+        }
+        os.makedirs("_data", exist_ok=True)
+        models_json_exists = os.path.exists("_data/models.json")
+        with open("_data/models.json", "w", encoding="utf-8") as f:
+            json.dump(models, f, ensure_ascii=False, indent=2)
+        if not models_json_exists:
+            append_created_file(summary, "_data/models.json")
 
-    existing_files = glob.glob("_models/*.md")
-    for file_path in existing_files:
-        file_name = os.path.splitext(os.path.basename(file_path))[0]
-        if file_name not in current_ids:
-            os.remove(file_path)
-            print(f"Deleted obsolete model page: {file_name}")
+        summary["phase"] = "updating_sheet"
+        current_target = {
+            "type": "sheet",
+            "stage": summary["phase"],
+            "sheet_name": SHEET_NAME,
+            "target_columns": [MODEL_ID_HEADER, MODEL_PAGE_URL_HEADER],
+        }
+        update_model_ids(sheet, row_id_pairs)
+        update_model_page_urls(sheet, row_url_pairs)
+        summary["sheet_model_id_updates"] = len(row_id_pairs)
+        summary["sheet_model_page_url_updates"] = len(row_url_pairs)
+
+        summary["phase"] = "deleting_obsolete_pages"
+        current_target = {
+            "type": "cleanup",
+            "stage": summary["phase"],
+            "directory": "_models",
+        }
+        # シート0件時に既存ページを全削除しない安全策
+        if not raw_records:
+            summary["delete_guard_triggered"] = True
+            print("No records found. Skip deleting existing model files.")
+        else:
+            existing_files = glob.glob("_models/*.md")
+            for file_path in existing_files:
+                file_name = os.path.splitext(os.path.basename(file_path))[0]
+                if file_name not in current_ids:
+                    current_target = {
+                        "type": "cleanup",
+                        "stage": summary["phase"],
+                        "model_id": file_name,
+                        "file": file_path.replace(os.sep, "/"),
+                    }
+                    os.remove(file_path)
+                    summary["deleted_model_ids"].append(file_name)
+                    print(f"Deleted obsolete model page: {file_name}")
+
+        summary["status"] = "success"
+    except Exception as exc:
+        summary["status"] = "error"
+        summary["error_type"] = type(exc).__name__
+        summary["error_message"] = str(exc)
+        failed_target = dict(current_target)
+        failed_target["phase"] = summary["phase"]
+        failed_target["error_type"] = type(exc).__name__
+        failed_target["error_message"] = str(exc)
+        append_failed_target(summary, failed_target)
+        write_run_summary(summary)
+        raise
+
+    write_run_summary(summary)
 
 
 if __name__ == "__main__":

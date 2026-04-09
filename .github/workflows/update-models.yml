@@ -24,10 +24,13 @@ jobs:
 
     steps:
       - name: Show trigger source
+        id: trigger_source
         run: |
           echo "event_name=${{ github.event_name }}"
           echo "event_action=${{ github.event.action || '' }}"
+
       - name: Show dispatch payload
+        id: dispatch_payload
         if: ${{ github.event_name == 'repository_dispatch' }}
         run: |
           echo "client_payload.triggered_by=${{ github.event.client_payload.triggered_by || '' }}"
@@ -35,36 +38,287 @@ jobs:
           echo "client_payload.triggered_at=${{ github.event.client_payload.triggered_at || '' }}"
 
       - name: Checkout repository
+        id: checkout
         uses: actions/checkout@v3
 
       - name: Set up Python
+        id: setup_python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
       - name: Install dependencies
+        id: install_dependencies
         run: pip install gspread oauth2client
 
       - name: Create credentials file
+        id: create_credentials
         run: |
+          mkdir -p .github/tmp
           printf '%s' '${{ secrets.GOOGLE_SHEETS_KEY }}' | tr -d '\r' > creds.json
 
       - name: Validate credentials JSON
+        id: validate_credentials
         run: python -m json.tool creds.json > /dev/null
 
       - name: Fetch spreadsheet, generate JSON and Markdown
+        id: generate_models
         run: python scripts/fetch_and_generate.py
 
-      - name: Commit and push changes
+      - name: Stage generated changes
+        id: stage_changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add _models _data assets/images/models
+          mkdir -p .github/tmp
+          for path in _models _data assets/images/models assets/videos/models; do
+            if [ -e "$path" ]; then
+              git add "$path"
+            fi
+          done
           # Safety guard: never include README.md in this auto commit.
           git restore --staged README.md 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to commit." > .github/tmp/change-status.txt
+            : > .github/tmp/change-name-status.txt
+            : > .github/tmp/change-stat.txt
             exit 0
           fi
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          git status --short _models _data assets/images/models assets/videos/models > .github/tmp/change-status.txt
+          git diff --cached --name-status --find-renames > .github/tmp/change-name-status.txt
+          git diff --cached --stat --find-renames > .github/tmp/change-stat.txt
+
+      - name: Commit changes
+        id: commit_changes
+        if: ${{ steps.stage_changes.outputs.has_changes == 'true' }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
           git commit -m "chore: sync models from spreadsheet and media"
-          git push
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Push changes
+        id: push_changes
+        if: ${{ steps.stage_changes.outputs.has_changes == 'true' }}
+        run: git push
+
+      - name: Write workflow summary
+        if: ${{ always() }}
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action || '' }}
+          ACTOR: ${{ github.actor }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          TRIGGERED_BY: ${{ github.event.client_payload.triggered_by || '' }}
+          SPREADSHEET_ID: ${{ github.event.client_payload.spreadsheet_id || '' }}
+          TRIGGERED_AT: ${{ github.event.client_payload.triggered_at || '' }}
+          CHECKOUT_CONCLUSION: ${{ steps.checkout.conclusion || 'skipped' }}
+          SETUP_PYTHON_CONCLUSION: ${{ steps.setup_python.conclusion || 'skipped' }}
+          INSTALL_DEPENDENCIES_CONCLUSION: ${{ steps.install_dependencies.conclusion || 'skipped' }}
+          CREATE_CREDENTIALS_CONCLUSION: ${{ steps.create_credentials.conclusion || 'skipped' }}
+          VALIDATE_CREDENTIALS_CONCLUSION: ${{ steps.validate_credentials.conclusion || 'skipped' }}
+          GENERATE_MODELS_CONCLUSION: ${{ steps.generate_models.conclusion || 'skipped' }}
+          STAGE_CHANGES_CONCLUSION: ${{ steps.stage_changes.conclusion || 'skipped' }}
+          COMMIT_CHANGES_CONCLUSION: ${{ steps.commit_changes.conclusion || 'skipped' }}
+          PUSH_CHANGES_CONCLUSION: ${{ steps.push_changes.conclusion || 'skipped' }}
+          HAS_CHANGES: ${{ steps.stage_changes.outputs.has_changes || 'false' }}
+          COMMIT_SHA: ${{ steps.commit_changes.outputs.commit_sha || '' }}
+          SCRIPT_SUMMARY_FILE: .github/tmp/update-models-script-summary.json
+          CHANGE_STATUS_FILE: .github/tmp/change-status.txt
+          CHANGE_NAME_STATUS_FILE: .github/tmp/change-name-status.txt
+          CHANGE_STAT_FILE: .github/tmp/change-stat.txt
+        run: |
+          python <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          def read_text(path):
+              file_path = Path(path)
+              if not file_path.exists():
+                  return ""
+              return file_path.read_text(encoding="utf-8").strip()
+
+          def read_json(path):
+              content = read_text(path)
+              if not content:
+                  return None
+              try:
+                  return json.loads(content)
+              except json.JSONDecodeError:
+                  return None
+
+          def add_section(lines, title, body_lines):
+              lines.append(f"## {title}")
+              lines.extend(body_lines)
+              lines.append("")
+
+          def step_line(label, key):
+              value = os.environ.get(key, "skipped")
+              return f"- {label}: `{value}`"
+
+          def list_lines(values, empty_message, limit=20):
+              if not values:
+                  return [empty_message]
+              lines = [f"- `{value}`" for value in values[:limit]]
+              if len(values) > limit:
+                  lines.append(f"- 他 {len(values) - limit} 件")
+              return lines
+
+          def failed_target_lines(targets, empty_message, limit=20):
+              if not targets:
+                  return [empty_message]
+
+              lines = []
+              for target in targets[:limit]:
+                  if not isinstance(target, dict):
+                      lines.append(f"- `{target}`")
+                      continue
+
+                  parts = []
+                  for key in [
+                      "type",
+                      "stage",
+                      "phase",
+                      "sheet_row",
+                      "model_id",
+                      "name",
+                      "file",
+                      "sheet_name",
+                      "directory",
+                      "error_type",
+                      "error_message",
+                  ]:
+                      value = target.get(key)
+                      if value in ("", None, [], {}):
+                          continue
+                      parts.append(f"{key}={value}")
+
+                  if not parts:
+                      parts.append(str(target))
+                  lines.append(f"- `{', '.join(parts)}`")
+
+              if len(targets) > limit:
+                  lines.append(f"- 他 {len(targets) - limit} 件")
+              return lines
+
+          script_summary = read_json(os.environ["SCRIPT_SUMMARY_FILE"]) or {}
+          change_status = read_text(os.environ["CHANGE_STATUS_FILE"])
+          change_name_status = read_text(os.environ["CHANGE_NAME_STATUS_FILE"])
+          change_stat = read_text(os.environ["CHANGE_STAT_FILE"])
+          has_changes = os.environ.get("HAS_CHANGES", "false") == "true"
+
+          lines = ["# Update Models"]
+
+          trigger_lines = [
+              f"- event: `{os.environ.get('EVENT_NAME', '')}`",
+              f"- action: `{os.environ.get('EVENT_ACTION', '') or 'n/a'}`",
+              f"- actor: `{os.environ.get('ACTOR', '')}`",
+              f"- ref: `{os.environ.get('REF_NAME', '')}`",
+              f"- sha: `{os.environ.get('SHA', '')}`",
+          ]
+          if os.environ.get("EVENT_NAME") == "repository_dispatch":
+              trigger_lines.extend(
+                  [
+                      f"- triggered_by: `{os.environ.get('TRIGGERED_BY', '') or 'n/a'}`",
+                      f"- spreadsheet_id: `{os.environ.get('SPREADSHEET_ID', '') or 'n/a'}`",
+                      f"- triggered_at: `{os.environ.get('TRIGGERED_AT', '') or 'n/a'}`",
+                  ]
+              )
+          add_section(lines, "Trigger", trigger_lines)
+
+          phase_lines = [
+              step_line("Checkout repository", "CHECKOUT_CONCLUSION"),
+              step_line("Set up Python", "SETUP_PYTHON_CONCLUSION"),
+              step_line("Install dependencies", "INSTALL_DEPENDENCIES_CONCLUSION"),
+              step_line("Create credentials file", "CREATE_CREDENTIALS_CONCLUSION"),
+              step_line("Validate credentials JSON", "VALIDATE_CREDENTIALS_CONCLUSION"),
+              step_line("Fetch spreadsheet and generate files", "GENERATE_MODELS_CONCLUSION"),
+              step_line("Stage generated changes", "STAGE_CHANGES_CONCLUSION"),
+              step_line("Commit changes", "COMMIT_CHANGES_CONCLUSION"),
+              step_line("Push changes", "PUSH_CHANGES_CONCLUSION"),
+          ]
+          add_section(lines, "Phase Status", phase_lines)
+
+          script_lines = []
+          if script_summary:
+              script_lines.extend(
+                  [
+                      f"- status: `{script_summary.get('status', 'unknown')}`",
+                      f"- phase: `{script_summary.get('phase', 'unknown')}`",
+                      f"- sheet: `{script_summary.get('sheet_name', '')}`",
+                      f"- total_sheet_rows: `{script_summary.get('total_sheet_rows', 0)}`",
+                      f"- visible_models: `{script_summary.get('visible_models', 0)}`",
+                      f"- hidden_models: `{script_summary.get('hidden_models', 0)}`",
+                      f"- model_pages_written: `{script_summary.get('model_pages_written', 0)}`",
+                      f"- sheet_model_id_updates: `{script_summary.get('sheet_model_id_updates', 0)}`",
+                      f"- sheet_model_page_url_updates: `{script_summary.get('sheet_model_page_url_updates', 0)}`",
+                      f"- delete_guard_triggered: `{script_summary.get('delete_guard_triggered', False)}`",
+                  ]
+              )
+              if script_summary.get("error_type") or script_summary.get("error_message"):
+                  script_lines.append(
+                      f"- error: `{script_summary.get('error_type', 'Error')}: {script_summary.get('error_message', '')}`"
+                  )
+              script_lines.append("- new_model_ids:")
+              script_lines.extend(
+                  list_lines(
+                      script_summary.get("new_model_ids", []),
+                      "- なし",
+                  )
+              )
+              script_lines.append("- created_files:")
+              script_lines.extend(
+                  list_lines(
+                      script_summary.get("created_files", []),
+                      "- なし",
+                  )
+              )
+              script_lines.append("- deleted_model_ids:")
+              script_lines.extend(
+                  list_lines(
+                      script_summary.get("deleted_model_ids", []),
+                      "- なし",
+                  )
+              )
+              script_lines.append("- failed_targets:")
+              script_lines.extend(
+                  failed_target_lines(
+                      script_summary.get("failed_targets", []),
+                      "- なし",
+                  )
+              )
+          else:
+              script_lines.append("- 生成スクリプトのサマリーは見つかりませんでした。開始前に失敗した可能性があります。")
+          add_section(lines, "Spreadsheet Sync Summary", script_lines)
+
+          change_lines = [f"- has_changes_to_commit: `{str(has_changes).lower()}`"]
+          if os.environ.get("COMMIT_SHA"):
+              change_lines.append(f"- commit_sha: `{os.environ['COMMIT_SHA']}`")
+          if change_status:
+              change_lines.append("- workspace_status_before_commit:")
+              change_lines.append("```text")
+              change_lines.append(change_status)
+              change_lines.append("```")
+          if change_name_status:
+              change_lines.append("- staged_name_status:")
+              change_lines.append("```text")
+              change_lines.append(change_name_status)
+              change_lines.append("```")
+          if change_stat:
+              change_lines.append("- staged_diff_stat:")
+              change_lines.append("```text")
+              change_lines.append(change_stat)
+              change_lines.append("```")
+          if not change_status and not change_name_status and not change_stat:
+              if has_changes:
+                  change_lines.append("- 変更ファイルの一覧は取得できませんでした。")
+              else:
+                  change_lines.append("- コミット対象の差分はありませんでした。")
+          add_section(lines, "Repository Changes", change_lines)
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary_file:
+              summary_file.write("\n".join(lines))
+              summary_file.write("\n")
+          PY
