@@ -59,12 +59,12 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add _models _data
+          git add _models _data assets/images/models
           # Safety guard: never include README.md in this auto commit.
           git restore --staged README.md 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "chore: update models from spreadsheet"
+          git commit -m "chore: sync models from spreadsheet and media"
           git push

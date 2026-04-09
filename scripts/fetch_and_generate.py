@@ -21,6 +21,7 @@ MODEL_VIDEO_DIR = os.path.join("assets", "videos", "models")
 MEDIA_URL_KEYS = ["url", "src", "path", "image", "source"]
 VIDEO_EXTENSIONS = (".mp4", ".mov", ".webm", ".m4v", ".ogv")
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif")
+GITKEEP_FILENAME = ".gitkeep"
 
 
 def first_value(record, keys, default=""):
@@ -347,6 +348,18 @@ def load_assets_media_entries(model_id):
         entries.append(entry)
 
     return entries
+
+
+def ensure_model_image_dir(model_id):
+    model_image_dir = os.path.join(MODEL_IMAGE_DIR, model_id)
+    os.makedirs(model_image_dir, exist_ok=True)
+
+    gitkeep_path = os.path.join(model_image_dir, GITKEEP_FILENAME)
+    if not os.path.exists(gitkeep_path):
+        with open(gitkeep_path, "w", encoding="utf-8") as f:
+            f.write("")
+
+    return model_image_dir
 
 
 def media_entry_key(entry):
@@ -758,7 +771,7 @@ def main():
         row_id_pairs.append((i + 1, model_id))
         row_url_pairs.append((i + 1, build_model_page_url(model_id, site_url, baseurl)))
 
-        os.makedirs(os.path.join(MODEL_IMAGE_DIR, model_id), exist_ok=True)
+        ensure_model_image_dir(model_id)
 
         filepath = f"_models/{model_id}.md"
         with open(filepath, "w", encoding="utf-8") as f:
