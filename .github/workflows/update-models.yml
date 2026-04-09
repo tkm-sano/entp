@@ -40,6 +40,8 @@ jobs:
       - name: Checkout repository
         id: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         id: setup_python
@@ -94,13 +96,52 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git commit -m "chore: sync models from spreadsheet and media"
+          mkdir -p .github/tmp
+          git commit -m "chore: sync models from spreadsheet and media" \
+            > .github/tmp/commit-output.txt 2>&1
           echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Push changes
         id: push_changes
         if: ${{ steps.stage_changes.outputs.has_changes == 'true' }}
-        run: git push
+        run: |
+          mkdir -p .github/tmp
+          set +e
+          git push > .github/tmp/push-output.txt 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            if grep -Eq "fetch first|non-fast-forward" .github/tmp/push-output.txt; then
+              echo "retried_with_rebase=true" >> "$GITHUB_OUTPUT"
+              echo "failure_reason=non-fast-forward" >> "$GITHUB_OUTPUT"
+              git pull --rebase origin "${GITHUB_REF_NAME}" > .github/tmp/rebase-output.txt 2>&1
+              rebase_status=$?
+              echo "rebase_exit_code=$rebase_status" >> "$GITHUB_OUTPUT"
+              if [ "$rebase_status" -eq 0 ]; then
+                echo "rebase_result=success" >> "$GITHUB_OUTPUT"
+                git push > .github/tmp/push-output-retry.txt 2>&1
+                retry_status=$?
+                if [ "$retry_status" -eq 0 ]; then
+                  echo "exit_code=0" >> "$GITHUB_OUTPUT"
+                  echo "failure_reason=" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
+                echo "retry_push_exit_code=$retry_status" >> "$GITHUB_OUTPUT"
+                echo "rebase_result=success" >> "$GITHUB_OUTPUT"
+                echo "failure_reason=push-failed-after-rebase" >> "$GITHUB_OUTPUT"
+                exit "$retry_status"
+              fi
+              echo "rebase_result=failure" >> "$GITHUB_OUTPUT"
+              echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+              exit "$status"
+            else
+              echo "retried_with_rebase=false" >> "$GITHUB_OUTPUT"
+              echo "failure_reason=push-failed" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "retried_with_rebase=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
 
       - name: Write workflow summary
         if: ${{ always() }}
@@ -122,12 +163,22 @@ jobs:
           STAGE_CHANGES_CONCLUSION: ${{ steps.stage_changes.conclusion || 'skipped' }}
           COMMIT_CHANGES_CONCLUSION: ${{ steps.commit_changes.conclusion || 'skipped' }}
           PUSH_CHANGES_CONCLUSION: ${{ steps.push_changes.conclusion || 'skipped' }}
+          PUSH_EXIT_CODE: ${{ steps.push_changes.outputs.exit_code || '' }}
+          PUSH_FAILURE_REASON: ${{ steps.push_changes.outputs.failure_reason || '' }}
+          RETRIED_WITH_REBASE: ${{ steps.push_changes.outputs.retried_with_rebase || 'false' }}
+          REBASE_EXIT_CODE: ${{ steps.push_changes.outputs.rebase_exit_code || '' }}
+          REBASE_RESULT: ${{ steps.push_changes.outputs.rebase_result || '' }}
+          RETRY_PUSH_EXIT_CODE: ${{ steps.push_changes.outputs.retry_push_exit_code || '' }}
           HAS_CHANGES: ${{ steps.stage_changes.outputs.has_changes || 'false' }}
           COMMIT_SHA: ${{ steps.commit_changes.outputs.commit_sha || '' }}
           SCRIPT_SUMMARY_FILE: .github/tmp/update-models-script-summary.json
           CHANGE_STATUS_FILE: .github/tmp/change-status.txt
           CHANGE_NAME_STATUS_FILE: .github/tmp/change-name-status.txt
           CHANGE_STAT_FILE: .github/tmp/change-stat.txt
+          COMMIT_OUTPUT_FILE: .github/tmp/commit-output.txt
+          PUSH_OUTPUT_FILE: .github/tmp/push-output.txt
+          REBASE_OUTPUT_FILE: .github/tmp/rebase-output.txt
+          RETRY_PUSH_OUTPUT_FILE: .github/tmp/push-output-retry.txt
         run: |
           python <<'PY'
           import json
@@ -207,6 +258,10 @@ jobs:
           change_status = read_text(os.environ["CHANGE_STATUS_FILE"])
           change_name_status = read_text(os.environ["CHANGE_NAME_STATUS_FILE"])
           change_stat = read_text(os.environ["CHANGE_STAT_FILE"])
+          commit_output = read_text(os.environ["COMMIT_OUTPUT_FILE"])
+          push_output = read_text(os.environ["PUSH_OUTPUT_FILE"])
+          rebase_output = read_text(os.environ["REBASE_OUTPUT_FILE"])
+          retry_push_output = read_text(os.environ["RETRY_PUSH_OUTPUT_FILE"])
           has_changes = os.environ.get("HAS_CHANGES", "false") == "true"
 
           lines = ["# Update Models"]
@@ -296,10 +351,47 @@ jobs:
           change_lines = [f"- has_changes_to_commit: `{str(has_changes).lower()}`"]
           if os.environ.get("COMMIT_SHA"):
               change_lines.append(f"- commit_sha: `{os.environ['COMMIT_SHA']}`")
+          if os.environ.get("COMMIT_SHA") and os.environ.get("PUSH_CHANGES_CONCLUSION") != "success":
+              change_lines.append("- remote_repository_updated: `false`")
+              change_lines.append("- note: `commit は runner 内で作成されたが、remote main には反映されていません`")
+          if script_summary.get("sheet_model_id_updates", 0) or script_summary.get("sheet_model_page_url_updates", 0):
+              if os.environ.get("PUSH_CHANGES_CONCLUSION") != "success":
+                  change_lines.append("- note: `スプレッドシート更新は実行済みの可能性がありますが、repo push は未反映です`")
+          if os.environ.get("PUSH_EXIT_CODE"):
+              change_lines.append(f"- push_exit_code: `{os.environ['PUSH_EXIT_CODE']}`")
+          if os.environ.get("PUSH_FAILURE_REASON"):
+              change_lines.append(f"- push_failure_reason: `{os.environ['PUSH_FAILURE_REASON']}`")
+          change_lines.append(f"- retried_with_rebase: `{os.environ.get('RETRIED_WITH_REBASE', 'false')}`")
+          if os.environ.get("REBASE_RESULT"):
+              change_lines.append(f"- rebase_result: `{os.environ['REBASE_RESULT']}`")
+          if os.environ.get("REBASE_EXIT_CODE"):
+              change_lines.append(f"- rebase_exit_code: `{os.environ['REBASE_EXIT_CODE']}`")
+          if os.environ.get("RETRY_PUSH_EXIT_CODE"):
+              change_lines.append(f"- retry_push_exit_code: `{os.environ['RETRY_PUSH_EXIT_CODE']}`")
           if change_status:
               change_lines.append("- workspace_status_before_commit:")
               change_lines.append("```text")
               change_lines.append(change_status)
+              change_lines.append("```")
+          if commit_output:
+              change_lines.append("- commit_output:")
+              change_lines.append("```text")
+              change_lines.append(commit_output)
+              change_lines.append("```")
+          if push_output:
+              change_lines.append("- push_output:")
+              change_lines.append("```text")
+              change_lines.append(push_output)
+              change_lines.append("```")
+          if rebase_output:
+              change_lines.append("- rebase_output:")
+              change_lines.append("```text")
+              change_lines.append(rebase_output)
+              change_lines.append("```")
+          if retry_push_output:
+              change_lines.append("- retry_push_output:")
+              change_lines.append("```text")
+              change_lines.append(retry_push_output)
               change_lines.append("```")
           if change_name_status:
               change_lines.append("- staged_name_status:")
