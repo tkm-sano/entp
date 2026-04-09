@@ -348,6 +348,32 @@ def load_assets_media_entries(model_id):
 
     return entries
 
+
+def media_entry_key(entry):
+    if not isinstance(entry, dict):
+        return ("value", str(entry).strip())
+    return (
+        str(entry.get("type", "image")).strip().lower(),
+        str(entry.get("url", "")).strip(),
+        str(entry.get("poster", "")).strip(),
+    )
+
+
+def merge_media_entries(primary_entries, secondary_entries):
+    merged = []
+    seen = set()
+
+    for entry in list(primary_entries) + list(secondary_entries):
+        if not entry:
+            continue
+        key = media_entry_key(entry)
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(entry)
+
+    return merged
+
 def parse_list(value):
     if value is None:
         return []
@@ -636,7 +662,7 @@ def build_model_record(record, index, existing_model_id_map=None):
         entry = build_media_entry(image)
         if entry:
             processed_images.append(entry)
-    images = processed_images if processed_images else load_assets_media_entries(model_id)
+    images = merge_media_entries(processed_images, load_assets_media_entries(model_id))
 
     hobby_1 = first_value(record, ["趣味①（必須）"])
     hobby_2 = first_value(record, ["趣味②（任意）"])
@@ -704,6 +730,7 @@ def main():
 
     models = []
     os.makedirs("_models", exist_ok=True)
+    os.makedirs(MODEL_IMAGE_DIR, exist_ok=True)
     current_ids = set()
     used_ids = set()
     row_id_pairs = []
@@ -730,6 +757,8 @@ def main():
         models.append(model)
         row_id_pairs.append((i + 1, model_id))
         row_url_pairs.append((i + 1, build_model_page_url(model_id, site_url, baseurl)))
+
+        os.makedirs(os.path.join(MODEL_IMAGE_DIR, model_id), exist_ok=True)
 
         filepath = f"_models/{model_id}.md"
         with open(filepath, "w", encoding="utf-8") as f:

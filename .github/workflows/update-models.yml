@@ -4,6 +4,12 @@ on:
   workflow_dispatch:  # 手動実行
   repository_dispatch:
     types: [update-models-from-sheet]  # スプレッドシートからの実行
+  push:
+    branches:
+      - main
+    paths:
+      - "assets/images/models/**"
+      - "assets/videos/models/**"
 
 concurrency:
   group: update-models
