@@ -17,8 +17,29 @@
       {% assign hobby_1 = page.hobby_1 %}
       {% assign hobby_2 = page.hobby_2 %}
       {% assign hobby_3 = page.hobby_3 %}
+      {% assign hobby_list = "" %}
+      {% if hobby_1 %}
+        {% assign hobby_list = hobby_1 %}
+      {% endif %}
+      {% if hobby_2 %}
+        {% if hobby_list != blank %}
+          {% assign hobby_list = hobby_list | append: " / " %}
+        {% endif %}
+        {% assign hobby_list = hobby_list | append: hobby_2 %}
+      {% endif %}
+      {% if hobby_3 %}
+        {% if hobby_list != blank %}
+          {% assign hobby_list = hobby_list | append: " / " %}
+        {% endif %}
+        {% assign hobby_list = hobby_list | append: hobby_3 %}
+      {% endif %}
+      {% assign hobby_display = hobby_list | default: skill_hobby %}
       {% assign miss_contest_year = page.miss_contest_year | default: page.misscontest_year %}
       {% assign instagram_url = page.instagram_url | default: page.instagram %}
+      {% assign instagram_username = page.instagram_username %}
+      {% if instagram_username == blank and instagram_url %}
+        {% assign instagram_username = instagram_url | split: 'instagram.com/' | last | split: '/' | first | split: '?' | first %}
+      {% endif %}
       {% assign x_url = page.x_url | default: page.x | default: page.twitter_url | default: page.twitter %}
       {% assign tiktok_url = page.tiktok_url | default: page.tiktok %}
 
@@ -165,34 +186,22 @@
                 <dt>身長</dt>
                 <dd><span class="numeric-readable">{{ page.height }}</span>cm</dd>
               </div>
-              {% if hobby_1 %}
+              {% if hobby_display %}
                 <div class="model-profile-item">
-                  <dt>趣味①</dt>
-                  <dd>{{ hobby_1 }}</dd>
-                </div>
-              {% endif %}
-              {% if hobby_2 %}
-                <div class="model-profile-item">
-                  <dt>趣味②</dt>
-                  <dd>{{ hobby_2 }}</dd>
-                </div>
-              {% endif %}
-              {% if hobby_3 %}
-                <div class="model-profile-item">
-                  <dt>趣味③</dt>
-                  <dd>{{ hobby_3 }}</dd>
-                </div>
-              {% endif %}
-              {% if skill_hobby and hobby_1 == blank and hobby_2 == blank and hobby_3 == blank %}
-                <div class="model-profile-item">
-                  <dt>特技・趣味</dt>
-                  <dd>{{ skill_hobby }}</dd>
+                  <dt>趣味</dt>
+                  <dd>{{ hobby_display }}</dd>
                 </div>
               {% endif %}
               {% if miss_contest_year %}
                 <div class="model-profile-item">
                   <dt>ミスコン出場年度</dt>
                   <dd><span class="numeric-readable">{{ miss_contest_year }}</span></dd>
+                </div>
+              {% endif %}
+              {% if instagram_username %}
+                <div class="model-profile-item">
+                  <dt>インスタのユーザーネーム</dt>
+                  <dd>@{{ instagram_username }}</dd>
                 </div>
               {% endif %}
               {% if page.tags and page.tags.size > 0 %}

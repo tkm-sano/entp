@@ -24,7 +24,12 @@ https.get(URL, (res) => {
     const json = JSON.parse(data.substring(47).slice(0, -2));
     const rows = json.table.rows;
 
-    const talents = rows.map(row => {
+    const talents = rows
+      .filter(row => {
+        const cells = row.c.map(c => c ? c.v : "");
+        return cells[25] !== "非表示";
+      })
+      .map(row => {
       const cells = row.c.map(c => c ? c.v : "");
 
       return {

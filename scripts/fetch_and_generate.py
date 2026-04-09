@@ -1,4 +1,5 @@
 import glob
+from datetime import date, datetime
 import json
 import os
 import re
@@ -142,6 +143,84 @@ def parse_int(value, default=0):
     if not match:
         return default
     return int(match.group(0))
+
+
+def parse_birth_date(value):
+    if value is None:
+        return ""
+
+    text = str(value).strip()
+    if text == "":
+        return ""
+
+    normalized = (
+        text.replace("年", "-")
+        .replace("月", "-")
+        .replace("日", "")
+        .replace("/", "-")
+        .replace(".", "-")
+    )
+    normalized = re.sub(r"\s+", "", normalized)
+
+    for fmt in ("%Y-%m-%d", "%Y-%m", "%Y%m%d", "%Y%m"):
+        try:
+            parsed = datetime.strptime(normalized, fmt)
+            if fmt in ("%Y-%m", "%Y%m"):
+                return parsed.strftime("%Y-%m-01")
+            return parsed.strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+
+    match = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", normalized)
+    if not match:
+        return ""
+
+    year, month, day = map(int, match.groups())
+    try:
+        return date(year, month, day).isoformat()
+    except ValueError:
+        return ""
+
+
+def calculate_age(birth_date, today=None):
+    if not birth_date:
+        return 0
+
+    try:
+        born = datetime.strptime(birth_date, "%Y-%m-%d").date()
+    except ValueError:
+        return 0
+
+    today = today or date.today()
+    age = today.year - born.year
+    if (today.month, today.day) < (born.month, born.day):
+        age -= 1
+    return max(age, 0)
+
+
+def extract_instagram_username(value):
+    text = str(value).strip()
+    if text == "":
+        return ""
+
+    if "instagram.com" not in text:
+        return text.lstrip("@")
+
+    parsed = urlparse(text)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if not path_parts:
+        return ""
+
+    username = path_parts[0]
+    if username.lower() in {"p", "reel", "stories", "explore"}:
+        return ""
+
+    return username.lstrip("@")
+
+
+def is_hidden_model(record):
+    display_flag = first_value(record, ["表示フラグ", "display_flag", "visible_flag"])
+    return display_flag == "非表示"
 
 
 def normalize_media_value(value):
@@ -473,6 +552,7 @@ def to_front_matter(model):
         "gender",
         "height",
         "age",
+        "birth_date",
         "university",
         "hobby_1",
         "hobby_2",
@@ -481,6 +561,7 @@ def to_front_matter(model):
         "miss_contest_year",
         "tags",
         "images",
+        "instagram_username",
         "instagram_url",
         "x_url",
         "tiktok_url",
@@ -541,7 +622,8 @@ def build_model_record(record, index, existing_model_id_map=None):
     if not model_id:
         model_id = f"model-{index}"
 
-    age = parse_int(first_value(record, ["年齢", "age"]))
+    birth_date = parse_birth_date(first_value(record, ["生年月日", "birth_date", "birthday", "dob"]))
+    age = calculate_age(birth_date) if birth_date else parse_int(first_value(record, ["年齢", "age"]))
     height = parse_int(first_value(record, ["身長", "height", "height_cm"]))
     gender = normalize_gender(first_value(record, ["性別", "gender"]))
 
@@ -573,6 +655,12 @@ def build_model_record(record, index, existing_model_id_map=None):
     )
 
     instagram_url = first_value(record, ["instagram_url", "instagram", "Instagram"])
+    instagram_username = first_value(
+        record,
+        ["instagram_username", "Instagramユーザーネーム", "インスタのユーザーネーム", "インスタユーザーネーム"],
+    )
+    if not instagram_username:
+        instagram_username = extract_instagram_username(instagram_url)
     x_url = first_value(record, ["x_url", "x", "X", "twitter_url", "twitter"])
     tiktok_url = first_value(record, ["tiktok_url", "tiktok", "TikTok"])
 
@@ -584,6 +672,7 @@ def build_model_record(record, index, existing_model_id_map=None):
         "gender": gender,
         "height": height,
         "age": age,
+        "birth_date": birth_date,
         "university": university,
         "hobby_1": hobby_1,
         "hobby_2": hobby_2,
@@ -592,6 +681,7 @@ def build_model_record(record, index, existing_model_id_map=None):
         "miss_contest_year": miss_contest_year,
         "tags": tags,
         "images": images,
+        "instagram_username": instagram_username,
         "instagram_url": instagram_url,
         "x_url": x_url,
         "tiktok_url": tiktok_url,
@@ -620,6 +710,11 @@ def main():
     row_url_pairs = []
 
     for i, record in enumerate(raw_records, start=1):
+        if is_hidden_model(record):
+            row_id_pairs.append((i + 1, ""))
+            row_url_pairs.append((i + 1, ""))
+            continue
+
         model_id, model = build_model_record(record, i, existing_model_id_map)
 
         # 重複時は連番サフィックスを付与
