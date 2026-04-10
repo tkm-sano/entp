@@ -2,8 +2,8 @@
 # サイト基本情報
 # ---------------------------------
 title: MissConnect
-baseurl: "/entp"
-url: "https://tkm-sano.github.io"
+baseurl: ""
+url: "https://model-database.missconnect.jp"
 layouts_dir: "_layouts"
 # Desktop/iCloud同期配下での書き込みタイムアウト回避
 destination: "/tmp/talent-site/_site"

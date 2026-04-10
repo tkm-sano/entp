@@ -5,8 +5,8 @@ destination: /tmp/talent-site/_site
 
 # Site info
 title: MissConnect
-baseurl: "/entp"
-url: "https://tkm-sano.github.io"
+baseurl: ""
+url: "https://model-database.missconnect.jp"
 layouts_dir: "_layouts"
 
 # Collections
