@@ -14,11 +14,17 @@
     "hobby_3": "",
     "skill_hobby": "カフェ巡り",
     "miss_contest_year": "25年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "ダンス経験あり",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "ダンス経験あり"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "ダンス経験あり"
+    ],
     "tags": [],
     "images": [
       {
@@ -57,11 +63,17 @@
     "hobby_3": "食べログ百名店巡り",
     "skill_hobby": "カラオケ 97点位 / 運動 陸上とテニスしてました / 食べログ百名店巡り",
     "miss_contest_year": "24年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "グランプリ受賞",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "グランプリ受賞"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "グランプリ受賞"
+    ],
     "tags": [],
     "images": [
       {
@@ -100,11 +112,17 @@
     "hobby_3": "ラテアート",
     "skill_hobby": "カフェ / 水泳 / ラテアート",
     "miss_contest_year": "22年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "準グランプリ受賞",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "準グランプリ受賞"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "準グランプリ受賞"
+    ],
     "tags": [],
     "images": [
       {
@@ -143,11 +161,17 @@
     "hobby_3": "けん玉",
     "skill_hobby": "ダンス / 旅行 / けん玉",
     "miss_contest_year": "25年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "その他ミスコン出身",
+    "tag_2": "ダンス経験あり",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "その他ミスコン出身",
+      "ダンス経験あり"
+    ],
+    "filter_tags": [
+      "その他ミスコン出身",
+      "ダンス経験あり"
+    ],
     "tags": [],
     "images": [
       {
@@ -186,11 +210,17 @@
     "hobby_3": "旅行が好きです",
     "skill_hobby": "ダンス / 柔軟性に自身があります！ / 歌(コーラス) / 旅行が好きです",
     "miss_contest_year": "23年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "準グランプリ受賞",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "準グランプリ受賞"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "準グランプリ受賞"
+    ],
     "tags": [],
     "images": [
       {
