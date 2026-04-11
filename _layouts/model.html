@@ -40,6 +40,10 @@
       {% if instagram_username == blank and instagram_url %}
         {% assign instagram_username = instagram_url | split: 'instagram.com/' | last | split: '/' | first | split: '?' | first %}
       {% endif %}
+      {% assign display_tags = page.profile_tags %}
+      {% if display_tags == nil or display_tags.size == 0 %}
+        {% assign display_tags = page.tags %}
+      {% endif %}
       {% assign x_url = page.x_url | default: page.x | default: page.twitter_url | default: page.twitter %}
       {% assign tiktok_url = page.tiktok_url | default: page.tiktok %}
 
@@ -212,12 +216,12 @@
                   <dd>@{{ instagram_username }}</dd>
                 </div>
               {% endif %}
-              {% if page.tags and page.tags.size > 0 %}
+              {% if display_tags and display_tags.size > 0 %}
                 <div class="model-profile-item">
                   <dt>TAGS</dt>
                   <dd class="model-profile-tags-inline">
                     <div class="model-tags" aria-label="タグ">
-                      {% for tag in page.tags %}
+                      {% for tag in display_tags %}
                         <span class="model-tag">#{{ tag }}</span>
                       {% endfor %}
                     </div>

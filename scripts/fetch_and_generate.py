@@ -530,6 +530,29 @@ def parse_list(value):
     return normalize_items(parts)
 
 
+def merge_unique_text_values(*groups):
+    merged = []
+    seen = set()
+
+    for group in groups:
+        if group is None:
+            continue
+        values = group if isinstance(group, list) else [group]
+        for value in values:
+            if value is None:
+                continue
+            text = str(value).strip()
+            if text == "":
+                continue
+            key = re.sub(r"\s+", "", text).casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(text)
+
+    return merged
+
+
 def build_media_entry(value):
     media_meta = {}
     url_candidate = None
@@ -741,6 +764,11 @@ def to_front_matter(model):
         "hobby_3",
         "skill_hobby",
         "miss_contest_year",
+        "tag_1",
+        "tag_2",
+        "tag_3",
+        "profile_tags",
+        "filter_tags",
         "tags",
         "images",
         "instagram_username",
@@ -812,6 +840,11 @@ def build_model_record(record, index, existing_model_id_map=None):
     tags = parse_list(
         first_value(record, ["タグ", "タグ（複数選択）", "タグ（複数）", "tags", "Tags"])
     )
+    tag_1 = first_value(record, ["タグ①", "タグ1", "tag_1", "tag1"])
+    tag_2 = first_value(record, ["タグ②", "タグ2", "tag_2", "tag2"])
+    tag_3 = first_value(record, ["タグ③", "タグ3", "tag_3", "tag3"])
+    profile_tags = merge_unique_text_values(tag_1, tag_2, tag_3)
+    filter_tags = merge_unique_text_values(tags, profile_tags)
     raw_images = parse_list(first_value(record, ["画像・動画", "画像", "images", "image_urls"]))
     processed_images = []
     for image in raw_images:
@@ -873,6 +906,11 @@ def build_model_record(record, index, existing_model_id_map=None):
         "hobby_3": hobby_3,
         "skill_hobby": skill_hobby,
         "miss_contest_year": miss_contest_year,
+        "tag_1": tag_1,
+        "tag_2": tag_2,
+        "tag_3": tag_3,
+        "profile_tags": profile_tags,
+        "filter_tags": filter_tags,
         "tags": tags,
         "images": images,
         "instagram_username": instagram_username,

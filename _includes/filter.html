@@ -2,6 +2,9 @@
    FILTER COMPONENT
 ================================ -->
 
+{% capture available_tags_raw %}{% for model in site.models %}{% assign model_filter_tags = model.filter_tags %}{% if model_filter_tags == nil or model_filter_tags.size == 0 %}{% assign model_filter_tags = model.tags %}{% endif %}{% if model_filter_tags and model_filter_tags.size > 0 %}{% for tag in model_filter_tags %}{{ tag | strip }}|||{% endfor %}{% endif %}{% endfor %}{% endcapture %}
+{% assign available_tags = available_tags_raw | split: '|||' | uniq | sort_natural %}
+
 <div class="filters-mobile-bar">
   <button type="button" class="filters-mobile-open" data-filter-action="open-sheet">
     SELECT
@@ -34,14 +37,12 @@
       <div class="filter-group filter-select-group filter-tag-group">
         <p id="filterTagLabel" class="filter-group-label">タグ</p>
         <div class="tag-options" aria-labelledby="filterTagLabel">
-          <label class="tag-option"><input type="checkbox" data-filter-tag="インフルエンサー"><span>インフルエンサー</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="ミス"><span>ミス</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="ミスター"><span>ミスター</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="可愛い系"><span>可愛い系</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="綺麗系"><span>綺麗系</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="清楚系"><span>清楚系</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="草食系"><span>草食系</span></label>
-          <label class="tag-option"><input type="checkbox" data-filter-tag="犬系"><span>犬系</span></label>
+          {% for tag in available_tags %}
+            {% assign clean_tag = tag | strip %}
+            {% if clean_tag != "" %}
+              <label class="tag-option"><input type="checkbox" data-filter-tag="{{ clean_tag | escape }}"><span>{{ clean_tag }}</span></label>
+            {% endif %}
+          {% endfor %}
         </div>
       </div>
     </div>

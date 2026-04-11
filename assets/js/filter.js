@@ -22,16 +22,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   let isSheetOpen = false;
 
-  const tagAliases = {
-    "インフルエンサー": ["インフルエンサー", "influencer"],
-    "ミス": ["ミス", "miss"],
-    "ミスター": ["ミスター", "mister", "mr"],
-    "可愛い系": ["可愛い系", "かわいい系", "kawaii", "cute"],
-    "綺麗系": ["綺麗系", "きれい系", "beauty", "beautiful"],
-    "清楚系": ["清楚系", "seiso"],
-    "草食系": ["草食系", "soushoku"],
-    "犬系": ["犬系", "inu", "dog"]
-  };
+  const tagAliases = [
+    ["インフルエンサー", "influencer"],
+    ["ミス", "miss"],
+    ["ミスター", "mister", "mr"],
+    ["可愛い系", "かわいい系", "kawaii", "cute"],
+    ["綺麗系", "きれい系", "beauty", "beautiful"],
+    ["清楚系", "seiso"],
+    ["草食系", "soushoku"],
+    ["犬系", "inu", "dog"]
+  ];
 
   const filters = {
     gender: "all",
@@ -50,7 +50,22 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function normalizeTag(tag) {
-    return tag.trim().toLowerCase();
+    return String(tag || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "");
+  }
+
+  function getTagCandidates(tag) {
+    const normalizedTag = normalizeTag(tag);
+    if (!normalizedTag) return [];
+
+    const aliasGroup = tagAliases.find(group =>
+      group.map(normalizeTag).includes(normalizedTag)
+    );
+
+    if (!aliasGroup) return [normalizedTag];
+    return aliasGroup.map(normalizeTag);
   }
 
   function toNumber(value) {
@@ -156,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const tagMatch = (() => {
         if (filters.tags.size === 0) return true;
         return [...filters.tags].every(tag => {
-          const aliases = (tagAliases[tag] || [tag]).map(normalizeTag);
+          const aliases = getTagCandidates(tag);
           return aliases.some(alias => cardTags.includes(alias));
         });
       })();
