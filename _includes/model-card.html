@@ -7,42 +7,57 @@
      data-tags="{{ include.model.tags | join: ',' | downcase | replace: ' ', '' }}"
      data-height="{{ include.model.height }}"
      data-age="{{ include.model.age }}">
-  {% assign card_media_entry = include.model.images[0] %}
-  {% assign card_media_src = card_media_entry.url | default: card_media_entry %}
-  {% assign card_media_type = card_media_entry.type | default: '' | downcase %}
-  {% assign card_media_poster = card_media_entry.poster | default: '' %}
-  {% assign card_media_probe = card_media_src | downcase | split: '?' | first | split: '#' | first %}
-  {% if card_media_type == '' %}
-    {% if card_media_probe contains '.mp4' or card_media_probe contains '.webm' or card_media_probe contains '.mov' or card_media_probe contains '.m4v' or card_media_probe contains '.ogv' %}
-      {% assign card_media_type = 'video' %}
-    {% else %}
-      {% assign card_media_type = 'image' %}
+  {% assign card_has_media = false %}
+  {% assign card_media_entry = nil %}
+  {% assign card_media_src = '' %}
+  {% assign card_media_type = '' %}
+  {% assign card_media_poster = '' %}
+  {% if include.model.images and include.model.images.size > 0 %}
+    {% assign card_media_entry = include.model.images[0] %}
+    {% assign card_media_src = card_media_entry.url | default: card_media_entry %}
+    {% if card_media_src != blank %}
+      {% assign card_has_media = true %}
+      {% assign card_media_type = card_media_entry.type | default: '' | downcase %}
+      {% assign card_media_poster = card_media_entry.poster | default: '' %}
+      {% assign card_media_probe = card_media_src | downcase | split: '?' | first | split: '#' | first %}
+      {% if card_media_type == '' %}
+        {% if card_media_probe contains '.mp4' or card_media_probe contains '.webm' or card_media_probe contains '.mov' or card_media_probe contains '.m4v' or card_media_probe contains '.ogv' %}
+          {% assign card_media_type = 'video' %}
+        {% else %}
+          {% assign card_media_type = 'image' %}
+        {% endif %}
+      {% endif %}
+      {% unless card_media_src contains '://' %}
+        {% assign card_media_src = card_media_src | relative_url %}
+      {% endunless %}
+      {% if card_media_poster != '' %}
+        {% unless card_media_poster contains '://' %}
+          {% assign card_media_poster = card_media_poster | relative_url %}
+        {% endunless %}
+      {% endif %}
     {% endif %}
-  {% endif %}
-  {% unless card_media_src contains '://' %}
-    {% assign card_media_src = card_media_src | relative_url %}
-  {% endunless %}
-  {% if card_media_poster != '' %}
-    {% unless card_media_poster contains '://' %}
-      {% assign card_media_poster = card_media_poster | relative_url %}
-    {% endunless %}
   {% endif %}
 
   <a href="{{ include.model.url | relative_url }}">
 
-    <div class="image-wrapper">
-      {% if card_media_type == 'video' %}
+    <div class="image-wrapper{% unless card_has_media %} is-placeholder{% endunless %}">
+      <div class="media-placeholder">
+        <span>COMING SOON</span>
+      </div>
+      {% if card_has_media and card_media_type == 'video' %}
         <video src="{{ card_media_src }}"
                {% if card_media_poster != '' %}poster="{{ card_media_poster }}"{% endif %}
                muted
                playsinline
                preload="metadata"
+               onerror="this.closest('.image-wrapper').classList.add('is-placeholder'); this.style.display='none';"
                aria-label="{{ include.model.name }}"></video>
-      {% else %}
+      {% elsif card_has_media %}
         <img src="{{ card_media_src }}"
              sizes="(max-width: 480px) 94vw, (max-width: 768px) 45vw, 220px"
              loading="lazy"
              decoding="async"
+             onerror="this.closest('.image-wrapper').classList.add('is-placeholder'); this.style.display='none';"
              alt="{{ include.model.name }}">
       {% endif %}
     </div>

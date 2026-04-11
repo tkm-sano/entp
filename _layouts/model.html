@@ -156,6 +156,14 @@
             </div>
           </section>
 
+        {% else %}
+          <section class="model-media-panel model-media-panel--placeholder" aria-label="モデルメディア">
+            <div id="modelPreviewStage" class="model-main-image is-placeholder" data-preview-type="placeholder">
+              <div class="media-placeholder">
+                <span>COMING SOON</span>
+              </div>
+            </div>
+          </section>
         {% endif %}
 
         <section class="model-info-panel">
@@ -270,7 +278,35 @@
       const previewStage = document.getElementById("modelPreviewStage");
       const triggers = Array.from(document.querySelectorAll("[data-preview-src]"));
 
-      if (!previewStage || triggers.length === 0) return;
+      if (!previewStage) return;
+
+      const buildPlaceholder = () => {
+        const placeholder = document.createElement("div");
+        placeholder.className = "media-placeholder";
+        const text = document.createElement("span");
+        text.textContent = "COMING SOON";
+        placeholder.appendChild(text);
+        return placeholder;
+      };
+
+      const showPreviewPlaceholder = () => {
+        previewStage.textContent = "";
+        previewStage.classList.add("is-placeholder");
+        previewStage.dataset.previewType = "placeholder";
+        previewStage.appendChild(buildPlaceholder());
+      };
+
+      const showTriggerPlaceholder = (trigger) => {
+        if (!trigger) return;
+        trigger.classList.add("is-placeholder");
+        trigger.innerHTML = "";
+        trigger.appendChild(buildPlaceholder());
+      };
+
+      if (triggers.length === 0) {
+        showPreviewPlaceholder();
+        return;
+      }
 
       const buildPreviewVideo = (src, label, poster) => {
         const video = document.createElement("video");
@@ -283,42 +319,27 @@
         video.playsInline = true;
         video.preload = "metadata";
         video.setAttribute("aria-label", label);
+        video.addEventListener("error", () => {
+          showPreviewPlaceholder();
+        }, { once: true });
         return video;
-      };
-
-      const buildThumbnailVideo = (src, poster) => {
-        const video = document.createElement("video");
-        video.src = src;
-        if (poster) {
-          video.poster = poster;
-        }
-        video.muted = true;
-        video.playsInline = true;
-        video.preload = "metadata";
-        video.tabIndex = -1;
-        video.setAttribute("aria-hidden", "true");
-        return video;
-      };
-
-      const promoteTriggerToVideo = (trigger) => {
-        if (trigger.dataset.previewType === "video") return;
-        trigger.dataset.previewType = "video";
-        trigger.classList.add("is-video");
-        const thumbnailImage = trigger.querySelector("img");
-        if (thumbnailImage && trigger.dataset.previewSrc) {
-          thumbnailImage.replaceWith(buildThumbnailVideo(trigger.dataset.previewSrc, trigger.dataset.previewPoster));
-        }
       };
 
       const renderPreview = (trigger) => {
         const nextSrc = trigger.dataset.previewSrc;
-        if (!nextSrc) return;
+        if (!nextSrc || trigger.classList.contains("is-placeholder")) {
+          triggers.forEach((item) => item.classList.remove("active"));
+          trigger.classList.add("active");
+          showPreviewPlaceholder();
+          return;
+        }
 
         const nextType = trigger.dataset.previewType === "video" ? "video" : "image";
         const nextAlt = trigger.dataset.previewAlt || "モデルメディア";
         const nextPoster = trigger.dataset.previewPoster || "";
 
         previewStage.textContent = "";
+        previewStage.classList.remove("is-placeholder");
 
         if (nextType === "video") {
           previewStage.appendChild(buildPreviewVideo(nextSrc, nextAlt, nextPoster));
@@ -331,8 +352,8 @@
           image.decoding = "async";
           image.alt = nextAlt;
           image.addEventListener("error", () => {
-            promoteTriggerToVideo(trigger);
-            renderPreview(trigger);
+            showTriggerPlaceholder(trigger);
+            showPreviewPlaceholder();
           }, { once: true });
           previewStage.appendChild(image);
         }
@@ -343,13 +364,24 @@
       };
 
       triggers.forEach((trigger) => {
-        if (trigger.dataset.previewType === "video") return;
+        if (trigger.dataset.previewType === "video") {
+          const thumbnailVideo = trigger.querySelector("video");
+          if (thumbnailVideo) {
+            thumbnailVideo.addEventListener("error", () => {
+              showTriggerPlaceholder(trigger);
+              if (trigger.classList.contains("active")) {
+                showPreviewPlaceholder();
+              }
+            }, { once: true });
+          }
+          return;
+        }
         const thumbnailImage = trigger.querySelector("img");
         if (!thumbnailImage) return;
         thumbnailImage.addEventListener("error", () => {
-          promoteTriggerToVideo(trigger);
+          showTriggerPlaceholder(trigger);
           if (trigger.classList.contains("active")) {
-            renderPreview(trigger);
+            showPreviewPlaceholder();
           }
         }, { once: true });
       });

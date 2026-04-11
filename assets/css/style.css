@@ -235,10 +235,11 @@ body {
 
 /* 画像比率維持 */
 .image-wrapper {
+  position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
   border-radius: 0;
-  background: transparent;
+  background: #f4efe5;
 }
 
 .image-wrapper img {
@@ -255,6 +256,46 @@ body {
   display: block;
   object-fit: cover;
   transition: transform 0.45s ease;
+}
+
+.media-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(135deg, #f8f2e8 0%, #ece2d1 100%);
+  color: #6f604a;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.media-placeholder span {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px solid rgba(111, 96, 74, 0.28);
+  font-size: clamp(0.72rem, 1.2vw, 0.92rem);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.image-wrapper.is-placeholder .media-placeholder,
+.model-main-image.is-placeholder .media-placeholder,
+.model-gallery-item.is-placeholder .media-placeholder {
+  opacity: 1;
+}
+
+.image-wrapper.is-placeholder img,
+.image-wrapper.is-placeholder video,
+.model-gallery-item.is-placeholder img,
+.model-gallery-item.is-placeholder video {
+  display: none;
 }
 
 .model-card:hover .image-wrapper img,
@@ -570,9 +611,12 @@ body {
 }
 
 .model-main-image {
+  position: relative;
   display: flex;
   justify-content: center;
   margin: 0;
+  overflow: hidden;
+  background: #f4efe5;
 }
 
 .model-main-image img,
@@ -586,6 +630,15 @@ body {
   display: block;
 }
 
+.model-main-image.is-placeholder {
+  aspect-ratio: 4 / 5;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+}
+
+.model-main-image.is-placeholder .media-placeholder {
+  position: absolute;
+}
+
 .model-gallery {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -594,10 +647,14 @@ body {
 }
 
 .model-gallery-item {
+  position: relative;
   border: 0;
   padding: 0;
   background: transparent;
   cursor: pointer;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #f4efe5;
 }
 
 .model-gallery-item img,
@@ -613,6 +670,12 @@ body {
 
 .model-gallery-item video {
   pointer-events: none;
+}
+
+.model-gallery-item .media-placeholder span {
+  padding: 8px 10px;
+  font-size: clamp(0.52rem, 0.8vw, 0.68rem);
+  letter-spacing: 0.18em;
 }
 
 .model-gallery-item:hover img,
