@@ -268,7 +268,7 @@ body {
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 55%),
     linear-gradient(135deg, #f8f2e8 0%, #ece2d1 100%);
-  color: #6f604a;
+  color: #ffffff;
   text-align: center;
   opacity: 0;
   pointer-events: none;
@@ -277,12 +277,11 @@ body {
 
 .media-placeholder span {
   display: inline-block;
-  padding: 10px 14px;
-  border: 1px solid rgba(111, 96, 74, 0.28);
   font-size: clamp(0.72rem, 1.2vw, 0.92rem);
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
 }
 
 .image-wrapper.is-placeholder .media-placeholder,
@@ -673,7 +672,6 @@ body {
 }
 
 .model-gallery-item .media-placeholder span {
-  padding: 8px 10px;
   font-size: clamp(0.52rem, 0.8vw, 0.68rem);
   letter-spacing: 0.18em;
 }
