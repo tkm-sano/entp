@@ -265,9 +265,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 18px;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 55%),
-    linear-gradient(135deg, #f8f2e8 0%, #ece2d1 100%);
+  background: rgba(255, 255, 255, 0.96);
   color: #ffffff;
   text-align: center;
   opacity: 0;
