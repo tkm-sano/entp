@@ -2,7 +2,7 @@
    FILTER COMPONENT
 ================================ -->
 
-{% capture available_tags_raw %}{% for model in site.models %}{% assign model_filter_tags = model.filter_tags %}{% if model_filter_tags == nil or model_filter_tags.size == 0 %}{% assign model_filter_tags = model.tags %}{% endif %}{% if model_filter_tags and model_filter_tags.size > 0 %}{% for tag in model_filter_tags %}{{ tag | strip }}|||{% endfor %}{% endif %}{% endfor %}{% endcapture %}
+{% capture available_tags_raw %}{% for model in site.models %}{% for tag in model.filter_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in model.profile_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in model.tags %}{{ tag | strip }}|||{% endfor %}{% endfor %}{% endcapture %}
 {% assign available_tags = available_tags_raw | split: '|||' | uniq | sort_natural %}
 
 <div class="filters-mobile-bar">
@@ -22,8 +22,8 @@
   </header>
 
   <div class="filters">
-    <div class="filter-row">
-      <div class="filter-group filter-select-group">
+    <div class="filter-row filter-row-primary">
+      <div class="filter-group filter-select-group filter-gender-group">
         <label for="filterGender">性別</label>
         <div class="select-wrap">
           <select id="filterGender" data-filter-select="gender">
@@ -33,21 +33,6 @@
           </select>
         </div>
       </div>
-
-      <div class="filter-group filter-select-group filter-tag-group">
-        <p id="filterTagLabel" class="filter-group-label">タグ</p>
-        <div class="tag-options" aria-labelledby="filterTagLabel">
-          {% for tag in available_tags %}
-            {% assign clean_tag = tag | strip %}
-            {% if clean_tag != "" %}
-              <label class="tag-option"><input type="checkbox" data-filter-tag="{{ clean_tag | escape }}"><span>{{ clean_tag }}</span></label>
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-
-    <div class="filter-row">
       <div class="filter-group filter-select-group filter-range-group">
         <label>身長</label>
         <div class="filter-range-selects">
@@ -70,6 +55,65 @@
           <span>〜</span>
           <div class="select-wrap">
             <select data-filter-select="age-max"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row filter-row-tags">
+      <div class="filter-group filter-select-group filter-tag-group">
+        <p id="filterTagLabel" class="filter-group-label">タグ（複数選択可）</p>
+        <div class="tag-options" aria-labelledby="filterTagLabel" role="list">
+          <button type="button" class="tag-option is-active" data-filter-tag="" aria-pressed="true">#すべて</button>
+          {% for tag in available_tags %}
+            {% assign clean_tag = tag | strip %}
+            {% if clean_tag != "" %}
+              <button type="button" class="tag-option" data-filter-tag="{{ clean_tag | escape }}" aria-pressed="false">#{{ clean_tag }}</button>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="mobile-tag-selects">
+          <div class="mobile-tag-select-group">
+            <label for="mobileFilterTag1">タグ①</label>
+            <div class="select-wrap">
+              <select id="mobileFilterTag1" data-filter-mobile-tag="0">
+                <option value="">選択なし</option>
+                {% for tag in available_tags %}
+                  {% assign clean_tag = tag | strip %}
+                  {% if clean_tag != "" %}
+                    <option value="{{ clean_tag | escape }}">{{ clean_tag }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="mobile-tag-select-group">
+            <label for="mobileFilterTag2">タグ②</label>
+            <div class="select-wrap">
+              <select id="mobileFilterTag2" data-filter-mobile-tag="1">
+                <option value="">選択なし</option>
+                {% for tag in available_tags %}
+                  {% assign clean_tag = tag | strip %}
+                  {% if clean_tag != "" %}
+                    <option value="{{ clean_tag | escape }}">{{ clean_tag }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="mobile-tag-select-group">
+            <label for="mobileFilterTag3">タグ③</label>
+            <div class="select-wrap">
+              <select id="mobileFilterTag3" data-filter-mobile-tag="2">
+                <option value="">選択なし</option>
+                {% for tag in available_tags %}
+                  {% assign clean_tag = tag | strip %}
+                  {% if clean_tag != "" %}
+                    <option value="{{ clean_tag | escape }}">{{ clean_tag }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
           </div>
         </div>
       </div>

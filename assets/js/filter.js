@@ -12,7 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const mobileFilterCount = document.getElementById("mobileFilterCount");
 
   const genderSelect = document.querySelector('[data-filter-select="gender"]');
-  const tagCheckboxes = document.querySelectorAll("[data-filter-tag]");
+  const tagButtons = Array.from(document.querySelectorAll("[data-filter-tag]"));
+  const mobileTagSelects = Array.from(document.querySelectorAll("[data-filter-mobile-tag]"));
   const heightMinSelect = document.querySelector('[data-filter-select="height-min"]');
   const heightMaxSelect = document.querySelector('[data-filter-select="height-max"]');
   const ageMinSelect = document.querySelector('[data-filter-select="age-min"]');
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const filters = {
     gender: "all",
-    tags: new Set(),
+    tags: [],
     heightMin: 0,
     heightMax: 0,
     ageMin: 0,
@@ -129,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getSelectedFilterCount() {
     let count = 0;
     if (filters.gender !== "all") count += 1;
-    count += filters.tags.size;
+    count += filters.tags.length;
     if (
       filters.heightMin !== filterDefaults.heightMin ||
       filters.heightMax !== filterDefaults.heightMax
@@ -148,6 +149,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateMobileFilterCount() {
     if (!mobileFilterCount) return;
     mobileFilterCount.textContent = String(getSelectedFilterCount());
+  }
+
+  function setSelectedTags(nextTags) {
+    filters.tags = Array.from(new Set(nextTags.filter(Boolean)));
+  }
+
+  function syncTagButtons() {
+    const hasTags = filters.tags.length > 0;
+    tagButtons.forEach(button => {
+      const buttonTag = button.getAttribute("data-filter-tag") || "";
+      const isActive = buttonTag === "" ? !hasTags : filters.tags.includes(buttonTag);
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+  }
+
+  function syncMobileTagSelects() {
+    mobileTagSelects.forEach((selectEl, index) => {
+      selectEl.value = filters.tags[index] || "";
+    });
   }
 
   function getMatchedCards() {
@@ -169,8 +190,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cardAge >= filters.ageMin && cardAge <= filters.ageMax;
 
       const tagMatch = (() => {
-        if (filters.tags.size === 0) return true;
-        return [...filters.tags].every(tag => {
+        if (filters.tags.length === 0) return true;
+        return filters.tags.every(tag => {
           const aliases = getTagCandidates(tag);
           return aliases.some(alias => cardTags.includes(alias));
         });
@@ -269,13 +290,27 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    tagCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener("change", () => {
-        const selectedTags = Array.from(tagCheckboxes)
-          .filter(input => input.checked)
-          .map(input => input.getAttribute("data-filter-tag"))
-          .filter(Boolean);
-        filters.tags = new Set(selectedTags);
+    tagButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const selectedTag = button.getAttribute("data-filter-tag") || "";
+        if (!selectedTag) {
+          setSelectedTags([]);
+        } else if (filters.tags.includes(selectedTag)) {
+          setSelectedTags(filters.tags.filter(tag => tag !== selectedTag));
+        } else {
+          setSelectedTags([...filters.tags, selectedTag]);
+        }
+        syncTagButtons();
+        syncMobileTagSelects();
+        filterCards();
+      });
+    });
+
+    mobileTagSelects.forEach(selectEl => {
+      selectEl.addEventListener("change", () => {
+        setSelectedTags(mobileTagSelects.map(input => input.value || ""));
+        syncTagButtons();
+        syncMobileTagSelects();
         filterCards();
       });
     });
@@ -327,16 +362,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetFilters() {
     filters.gender = "all";
-    filters.tags.clear();
+    setSelectedTags([]);
     filters.heightMin = filterDefaults.heightMin;
     filters.heightMax = filterDefaults.heightMax;
     filters.ageMin = filterDefaults.ageMin;
     filters.ageMax = filterDefaults.ageMax;
 
     if (genderSelect) genderSelect.value = "all";
-    tagCheckboxes.forEach(checkbox => {
-      checkbox.checked = false;
-    });
+    syncTagButtons();
+    syncMobileTagSelects();
     if (heightMinSelect) heightMinSelect.value = String(filters.heightMin);
     if (heightMaxSelect) heightMaxSelect.value = String(filters.heightMax);
     if (ageMinSelect) ageMinSelect.value = String(filters.ageMin);
@@ -377,8 +411,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   initializeRangeSelects();
+  syncTagButtons();
   bindSelectEvents();
   bindSheetEvents();
   syncSheetAriaHidden();
+  syncMobileTagSelects();
   filterCards();
 });

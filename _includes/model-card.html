@@ -6,10 +6,8 @@
 {% if display_tags == nil or display_tags.size == 0 %}
   {% assign display_tags = include.model.tags %}
 {% endif %}
-{% assign searchable_tags = include.model.filter_tags %}
-{% if searchable_tags == nil or searchable_tags.size == 0 %}
-  {% assign searchable_tags = include.model.tags %}
-{% endif %}
+{% capture searchable_tags_raw %}{% for tag in include.model.filter_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in include.model.profile_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in include.model.tags %}{{ tag | strip }}|||{% endfor %}{% endcapture %}
+{% assign searchable_tags = searchable_tags_raw | split: '|||' | uniq %}
 
 <div class="model-card"
      data-gender="{{ include.model.gender | downcase }}"
