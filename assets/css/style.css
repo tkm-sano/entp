@@ -394,6 +394,10 @@ body {
 .filters-sheet-close {
   border: 0;
   background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   font-size: 1.5rem;
   line-height: 1;
   color: #111111;
@@ -1294,8 +1298,12 @@ body {
   }
 
   .filters-sheet-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 34px;
     height: 34px;
+    padding: 0;
     border-radius: 999px;
     background: #111111;
     color: #ffffff;
@@ -1351,6 +1359,10 @@ body {
 
   .filters-sheet .filter-range-selects span {
     font-size: 16px !important;
+  }
+
+  .filters-sheet .filter-range-selects {
+    gap: 8px;
   }
 
   .filters-sheet-actions {
