@@ -428,6 +428,10 @@ body {
   flex-wrap: nowrap;
 }
 
+.filter-row-primary .filter-range-group + .filter-range-group {
+  margin-left: 8px;
+}
+
 .filter-row-tags {
   margin-top: 8px;
 }
@@ -523,16 +527,18 @@ body {
 .filter-range-selects {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(30px, 0.24fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 0;
+  column-gap: 8px;
+  row-gap: 0;
 }
 
 .filter-range-selects span {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: auto;
+  min-width: 1.25em;
   color: rgba(17, 17, 17, 0.72);
   font-size: 0.82rem;
   letter-spacing: 0.12em;
@@ -988,6 +994,7 @@ body {
 
   .filters .filter-row-primary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 16px;
   }
 
   .filter-group {
@@ -1023,7 +1030,7 @@ body {
   }
 
   .filter-range-selects {
-    grid-template-columns: minmax(0, 1fr) minmax(34px, 0.26fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
 
   .filter-row-primary {
@@ -1412,6 +1419,10 @@ body {
   .filter-row-primary {
     display: flex;
     flex-wrap: wrap;
+  }
+
+  .filter-row-primary .filter-range-group + .filter-range-group {
+    margin-left: 0;
   }
 
   .filter-group {
