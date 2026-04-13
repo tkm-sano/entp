@@ -157,10 +157,10 @@ def ensure_sheet_column(sheet, header_name):
 
 
 def update_model_page_urls(sheet, row_url_pairs):
+    url_col = ensure_sheet_column(sheet, MODEL_PAGE_URL_HEADER)
     if not row_url_pairs:
         return
 
-    url_col = ensure_sheet_column(sheet, MODEL_PAGE_URL_HEADER)
     updates = [
         {
             "range": rowcol_to_a1(row, url_col),
@@ -173,10 +173,10 @@ def update_model_page_urls(sheet, row_url_pairs):
 
 
 def update_model_ids(sheet, row_id_pairs):
+    model_id_col = ensure_sheet_column(sheet, MODEL_ID_HEADER)
     if not row_id_pairs:
         return
 
-    model_id_col = ensure_sheet_column(sheet, MODEL_ID_HEADER)
     updates = [
         {
             "range": rowcol_to_a1(row, model_id_col),
