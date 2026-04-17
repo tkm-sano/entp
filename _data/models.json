@@ -1,6 +1,6 @@
 [
   {
-    "id": "mc-0005",
+    "id": "mc-0004",
     "layout": "model",
     "name": "鈴木開斗",
     "kana": "すずきかいと",
@@ -20,30 +20,14 @@
     "profile_tags": [],
     "filter_tags": [],
     "tags": [],
-    "images": [
-      {
-        "url": "/assets/images/models/mc-0005/01_589648013_17864777430518127_6907367043059862523_n.jpg"
-      },
-      {
-        "url": "/assets/images/models/mc-0005/02_573212889_17861810964518127_5370549369273889355_n.jpg"
-      },
-      {
-        "url": "/assets/images/models/mc-0005/03_620489895_17871215463518127_9027775801157356322_n.jpg"
-      },
-      {
-        "url": "/assets/images/models/mc-0005/04_648144740_17877279909518127_5360962698444673562_n.jpg"
-      },
-      {
-        "url": "/assets/images/models/mc-0005/568529691_17860329690518127_6087420206435022102_n.jpg"
-      }
-    ],
+    "images": [],
     "instagram_username": "kaito_suzuki_official",
     "instagram_url": "https://www.instagram.com/kaito_suzuki_official/",
     "x_url": "",
     "tiktok_url": ""
   },
   {
-    "id": "mc-0005-2",
+    "id": "mc-0005",
     "layout": "model",
     "name": "伊藤優加",
     "kana": "イトウユカ",
