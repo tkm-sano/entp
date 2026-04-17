@@ -2,6 +2,49 @@
   {
     "id": "mc-0005",
     "layout": "model",
+    "name": "鈴木開斗",
+    "kana": "すずきかいと",
+    "gender": "male",
+    "height": 177,
+    "age": 23,
+    "birth_date": "2002-10-11",
+    "university": "立教大学",
+    "hobby_1": "筋トレ、ゴルフ",
+    "hobby_2": "",
+    "hobby_3": "",
+    "skill_hobby": "筋トレ / ゴルフ",
+    "miss_contest_year": "24",
+    "tag_1": "",
+    "tag_2": "",
+    "tag_3": "",
+    "profile_tags": [],
+    "filter_tags": [],
+    "tags": [],
+    "images": [
+      {
+        "url": "/assets/images/models/mc-0005/01_589648013_17864777430518127_6907367043059862523_n.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0005/02_573212889_17861810964518127_5370549369273889355_n.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0005/03_620489895_17871215463518127_9027775801157356322_n.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0005/04_648144740_17877279909518127_5360962698444673562_n.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0005/568529691_17860329690518127_6087420206435022102_n.jpg"
+      }
+    ],
+    "instagram_username": "kaito_suzuki_official",
+    "instagram_url": "https://www.instagram.com/kaito_suzuki_official/",
+    "x_url": "",
+    "tiktok_url": ""
+  },
+  {
+    "id": "mc-0005-2",
+    "layout": "model",
     "name": "伊藤優加",
     "kana": "イトウユカ",
     "gender": "female",
@@ -685,5 +728,32 @@
     "instagram_url": "https://www.instagram.com/missgu_2024_02/",
     "x_url": "https://x.com/missgu_2024_02",
     "tiktok_url": "https://www.tiktok.com/@missgu_2024_02"
+  },
+  {
+    "id": "mc-0022",
+    "layout": "model",
+    "name": "久保薗春希",
+    "kana": "クボゾノハルキ",
+    "gender": "male",
+    "height": 175,
+    "age": 22,
+    "birth_date": "2004-03-15",
+    "university": "青山学院大学",
+    "hobby_1": "ダンス、旅行、グルメ、映画、お酒、ダーツ、ボーリング",
+    "hobby_2": "",
+    "hobby_3": "",
+    "skill_hobby": "ダンス / 旅行 / グルメ / 映画 / お酒 / ダーツ / ボーリング",
+    "miss_contest_year": "23年度",
+    "tag_1": "",
+    "tag_2": "",
+    "tag_3": "",
+    "profile_tags": [],
+    "filter_tags": [],
+    "tags": [],
+    "images": [],
+    "instagram_username": "haruki_kubozono",
+    "instagram_url": "https://www.instagram.com/haruki_kubozono/",
+    "x_url": "",
+    "tiktok_url": ""
   }
 ]
