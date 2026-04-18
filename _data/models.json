@@ -49,7 +49,23 @@
     "profile_tags": [],
     "filter_tags": [],
     "tags": [],
-    "images": [],
+    "images": [
+      {
+        "url": "/assets/images/models/mc-0002/3CFAA0AD-4FEA-48A8-9582-725C895BC0A3.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0002/8E9C321B-664D-4726-9862-52E04CD4250A.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0002/A3944B38-C68B-4B58-9A1E-93FC1351F2FC.jpg"
+      },
+      {
+        "url": "/assets/images/models/mc-0002/IMG_3193.JPG"
+      },
+      {
+        "url": "/assets/images/models/mc-0002/IMG_3216.JPG"
+      }
+    ],
     "instagram_username": "kaito_suzuki_official",
     "instagram_url": "https://www.instagram.com/kaito_suzuki_official/",
     "x_url": "",
