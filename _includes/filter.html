@@ -2,7 +2,7 @@
    FILTER COMPONENT
 ================================ -->
 
-{% capture available_tags_raw %}{% for model in site.models %}{% for tag in model.filter_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in model.profile_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in model.tags %}{{ tag | strip }}|||{% endfor %}{% endfor %}{% endcapture %}
+{% capture available_tags_raw %}{% for model in site.models %}{% if model.visible != false %}{% for tag in model.filter_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in model.profile_tags %}{{ tag | strip }}|||{% endfor %}{% for tag in model.tags %}{{ tag | strip }}|||{% endfor %}{% endif %}{% endfor %}{% endcapture %}
 {% assign available_tags = available_tags_raw | split: '|||' | uniq | sort_natural %}
 
 <div class="filters-mobile-bar">

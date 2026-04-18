@@ -23,7 +23,9 @@ title: MODEL DATABASE
 <section class="model-grid">
 
   {% for t in site.models %}
-    {% include model-card.html model=t %}
+    {% if t.visible != false %}
+      {% include model-card.html model=t %}
+    {% endif %}
   {% endfor %}
 
 </section>

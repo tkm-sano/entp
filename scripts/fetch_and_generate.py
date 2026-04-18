@@ -12,6 +12,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 SHEET_NAME = "モデル一覧"
+CASE_ID_HEADER = "案件ID"
 MODEL_PAGE_URL_HEADER = "個別ページURL"
 MODEL_ID_HEADER = "モデルID"
 SITE_CONFIG_PATH = "_config.yml"
@@ -186,6 +187,22 @@ def update_model_ids(sheet, row_id_pairs):
     ]
     sheet.batch_update(updates, value_input_option="RAW")
     print(f"Updated {len(row_id_pairs)} IDs in sheet column '{MODEL_ID_HEADER}'.")
+
+
+def update_case_ids(sheet, row_case_id_pairs):
+    case_id_col = ensure_sheet_column(sheet, CASE_ID_HEADER)
+    if not row_case_id_pairs:
+        return
+
+    updates = [
+        {
+            "range": rowcol_to_a1(row, case_id_col),
+            "values": [[case_id]],
+        }
+        for row, case_id in row_case_id_pairs
+    ]
+    sheet.batch_update(updates, value_input_option="RAW")
+    print(f"Updated {len(row_case_id_pairs)} IDs in sheet column '{CASE_ID_HEADER}'.")
 
 
 def parse_int(value, default=0):
@@ -740,6 +757,87 @@ def load_existing_model_id_map(path=os.path.join("_data", "models.json")):
     return id_map
 
 
+def build_sequential_model_id(index):
+    return f"mc-{index:04d}"
+
+
+def resolve_model_id(index):
+    return build_sequential_model_id(index)
+
+
+def split_sequence_id(value):
+    text = str(value).strip()
+    if not text:
+        return "", None, 0
+
+    match = re.match(r"^(.*?)(\d+)$", text)
+    if not match:
+        return text, None, 0
+
+    digits = match.group(2)
+    return match.group(1), int(digits), len(digits)
+
+
+def detect_sequence_format(existing_values):
+    parsed_formats = []
+    for value in existing_values:
+        prefix, number, width = split_sequence_id(value)
+        if number is None:
+            continue
+        parsed_formats.append((prefix, width))
+
+    if not parsed_formats:
+        return "", 0
+
+    prefix = parsed_formats[0][0]
+    width = max(parsed_width for parsed_prefix, parsed_width in parsed_formats if parsed_prefix == prefix)
+    return prefix, width
+
+
+def format_sequence_id(number, prefix="", width=0):
+    digits = str(number).zfill(width) if width > 0 else str(number)
+    return f"{prefix}{digits}"
+
+
+def build_case_id_pairs(raw_records):
+    existing_values_by_row = {}
+    existing_values = []
+    used_numbers = set()
+
+    for index, record in enumerate(raw_records, start=1):
+        sheet_row = index + 1
+        case_id = first_value(record, [CASE_ID_HEADER, "case_id", "project_id"])
+        if not case_id:
+            continue
+
+        existing_values_by_row[sheet_row] = case_id
+        existing_values.append(case_id)
+        _, number, _ = split_sequence_id(case_id)
+        if number is not None and number > 0:
+            used_numbers.add(number)
+
+    prefix, width = detect_sequence_format(existing_values)
+    next_number = 1
+    row_case_id_pairs = []
+
+    for index, _record in enumerate(raw_records, start=1):
+        sheet_row = index + 1
+        existing_case_id = existing_values_by_row.get(sheet_row)
+        if existing_case_id:
+            row_case_id_pairs.append((sheet_row, existing_case_id))
+            continue
+
+        while next_number in used_numbers:
+            next_number += 1
+
+        case_id = format_sequence_id(next_number, prefix, width)
+        used_numbers.add(next_number)
+        row_case_id_pairs.append((sheet_row, case_id))
+        next_number += 1
+
+    return row_case_id_pairs
+
+
 def yaml_scalar(value):
     if isinstance(value, bool):
         return "true" if value else "false"
@@ -752,6 +850,7 @@ def to_front_matter(model):
     lines = ["---"]
     order = [
         "layout",
+        "visible",
         "name",
         "kana",
         "gender",
@@ -813,24 +912,12 @@ def to_front_matter(model):
     return "\n".join(lines) + "\n"
 
 
-def build_model_record(record, index, existing_model_id_map=None):
+def build_model_record(record, index):
     name = first_value(record, ["名前", "氏名", "name"])
     kana = first_value(record, ["フリガナ", "ふりがな", "名前カナ", "かな", "カナ", "kana"])
     university = first_value(record, ["大学", "university", "school"])
-    model_id = first_value(record, [MODEL_ID_HEADER, "model_id", "id"])
-    if model_id:
-        model_id = slugify(model_id)
-    if not model_id:
-        model_id = extract_model_id_from_page_url(first_value(record, [MODEL_PAGE_URL_HEADER]))
-    if not model_id and existing_model_id_map:
-        for match_key in build_model_match_keys(record):
-            if match_key in existing_model_id_map:
-                model_id = existing_model_id_map[match_key]
-                break
-    if not model_id:
-        model_id = slugify(f"{name}-{university}")
-    if not model_id:
-        model_id = f"model-{index}"
+    model_id = resolve_model_id(index)
+    is_visible = not is_hidden_model(record)
 
     birth_date = parse_birth_date(first_value(record, ["生年月日", "birth_date", "birthday", "dob"]))
     age = calculate_age(birth_date) if birth_date else parse_int(first_value(record, ["年齢", "age"]))
@@ -894,6 +981,7 @@ def build_model_record(record, index, existing_model_id_map=None):
     model = {
         "id": model_id,
         "layout": "model",
+        "visible": is_visible,
         "name": name,
         "kana": kana,
         "gender": gender,
@@ -951,6 +1039,7 @@ def main():
         "visible_models": 0,
         "hidden_models": 0,
         "model_pages_written": 0,
+        "sheet_case_id_updates": 0,
         "sheet_model_id_updates": 0,
         "sheet_model_page_url_updates": 0,
         "written_model_ids": [],
@@ -996,7 +1085,6 @@ def main():
             "file": "_data/models.json",
         }
         site_url, baseurl = load_site_url_config()
-        existing_model_id_map = load_existing_model_id_map()
         existing_model_ids = {
             os.path.splitext(os.path.basename(path))[0] for path in glob.glob("_models/*.md")
         }
@@ -1005,7 +1093,7 @@ def main():
         os.makedirs("_models", exist_ok=True)
         os.makedirs(MODEL_IMAGE_DIR, exist_ok=True)
         current_ids = set()
-        used_ids = set()
+        row_case_id_pairs = build_case_id_pairs(raw_records)
         row_id_pairs = []
         row_url_pairs = []
 
@@ -1019,27 +1107,16 @@ def main():
                 "name": first_value(record, ["名前", "氏名", "name"]),
                 "university": first_value(record, ["大学", "university", "school"]),
             }
-            if is_hidden_model(record):
-                summary["hidden_models"] += 1
-                row_id_pairs.append((sheet_row, ""))
-                row_url_pairs.append((sheet_row, ""))
-                continue
-
-            model_id, model = build_model_record(record, i, existing_model_id_map)
-
-            # 重複時は連番サフィックスを付与
-            base_id = model_id
-            n = 2
-            while model_id in used_ids:
-                model_id = f"{base_id}-{n}"
-                n += 1
-            used_ids.add(model_id)
-
-            model["id"] = model_id
+            model_id, model = build_model_record(record, i)
             current_ids.add(model_id)
             models.append(model)
             row_id_pairs.append((sheet_row, model_id))
             row_url_pairs.append((sheet_row, build_model_page_url(model_id, site_url, baseurl)))
+
+            if model.get("visible", True):
+                summary["visible_models"] += 1
+            else:
+                summary["hidden_models"] += 1
 
             current_target = {
                 "type": "model",
@@ -1068,7 +1145,6 @@ def main():
             if not file_already_exists:
                 append_created_file(summary, filepath)
 
-            summary["visible_models"] += 1
             summary["model_pages_written"] += 1
             summary["written_model_ids"].append(model_id)
             if model_id not in existing_model_ids:
@@ -1092,10 +1168,12 @@ def main():
             "type": "sheet",
             "stage": summary["phase"],
             "sheet_name": SHEET_NAME,
-            "target_columns": [MODEL_ID_HEADER, MODEL_PAGE_URL_HEADER],
+            "target_columns": [CASE_ID_HEADER, MODEL_ID_HEADER, MODEL_PAGE_URL_HEADER],
         }
+        update_case_ids(sheet, row_case_id_pairs)
         update_model_ids(sheet, row_id_pairs)
         update_model_page_urls(sheet, row_url_pairs)
+        summary["sheet_case_id_updates"] = len(row_case_id_pairs)
         summary["sheet_model_id_updates"] = len(row_id_pairs)
         summary["sheet_model_page_url_updates"] = len(row_url_pairs)
 
