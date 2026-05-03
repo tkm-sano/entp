@@ -1021,11 +1021,17 @@
     "hobby_3": "漫画を読む",
     "skill_hobby": "サッカー観戦 / 御朱印集め / 漫画を読む",
     "miss_contest_year": "23年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "グランプリ受賞",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "グランプリ受賞"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "グランプリ受賞"
+    ],
     "tags": [],
     "images": [],
     "instagram_username": "raiki_yoshikawa_",
@@ -1049,11 +1055,17 @@
     "hobby_3": "旅行",
     "skill_hobby": "ミュージカル / ダンス / 旅行",
     "miss_contest_year": "23年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "ダンス経験あり",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "ダンス経験あり"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "ダンス経験あり"
+    ],
     "tags": [],
     "images": [],
     "instagram_username": "satoko__inaba",
@@ -1077,11 +1089,15 @@
     "hobby_3": "",
     "skill_hobby": "テニス",
     "miss_contest_year": "24年度",
-    "tag_1": "",
+    "tag_1": "大学ミスコン出身",
     "tag_2": "",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身"
+    ],
     "tags": [],
     "images": [],
     "instagram_username": "momo._.sz",
@@ -1105,11 +1121,17 @@
     "hobby_3": "",
     "skill_hobby": "書道",
     "miss_contest_year": "23年度",
-    "tag_1": "",
-    "tag_2": "",
+    "tag_1": "大学ミスコン出身",
+    "tag_2": "準グランプリ受賞",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "大学ミスコン出身",
+      "準グランプリ受賞"
+    ],
+    "filter_tags": [
+      "大学ミスコン出身",
+      "準グランプリ受賞"
+    ],
     "tags": [],
     "images": [],
     "instagram_username": "niconicowhite",
@@ -1133,11 +1155,15 @@
     "hobby_3": "筋トレ",
     "skill_hobby": "ドラム演奏 / 茶道 / 筋トレ",
     "miss_contest_year": "25年度",
-    "tag_1": "",
+    "tag_1": "その他ミスコン出身",
     "tag_2": "",
     "tag_3": "",
-    "profile_tags": [],
-    "filter_tags": [],
+    "profile_tags": [
+      "その他ミスコン出身"
+    ],
+    "filter_tags": [
+      "その他ミスコン出身"
+    ],
     "tags": [],
     "images": [],
     "instagram_username": "ayuka.tsunemi",
