@@ -67,6 +67,13 @@ jobs:
         id: generate_models
         run: python scripts/fetch_and_generate.py
 
+      - name: Sync models to Notion
+        id: sync_notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+        run: python scripts/sync_notion.py
+
       - name: Stage generated changes
         id: stage_changes
         run: |
