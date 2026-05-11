@@ -23,7 +23,17 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # ── 設定 ──────────────────────────────────────────────────────────────────────
 SHEET_NAME     = "モデル一覧"
-NOTION_DB_ID   = os.environ.get("NOTION_DB_ID", "1c60cd11-eda2-4625-8549-3f5896c7ce05")
+def _extract_notion_id(raw: str) -> str:
+    """Notion DB ID を URL 形式・ハイフンなし形式どちらでも正規化する。"""
+    raw = raw.strip()
+    # 32文字の16進数を抽出
+    m = re.search(r'[0-9a-fA-F]{32}', raw.replace('-', ''))
+    if m:
+        h = m.group(0).lower()
+        return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
+    return raw
+
+NOTION_DB_ID   = _extract_notion_id(os.environ.get("NOTION_DB_ID", "1c60cd11-eda2-4625-8549-3f5896c7ce05"))
 NOTION_API     = "https://api.notion.com/v1"
 NOTION_VER     = "2022-06-28"
 CREDS_FILE     = os.environ.get("GOOGLE_SHEETS_CREDS_FILE", "creds.json")
@@ -192,6 +202,8 @@ def main() -> None:
     if not token:
         print("⚠️  NOTION_TOKEN が未設定のため Notion 同期をスキップします。")
         return
+    print(f"🔍 NOTION_DB_ID: {NOTION_DB_ID}")
+    print(f"🔍 TOKEN prefix: {token[:10]}...")
 
     scope = [
         "https://spreadsheets.google.com/feeds",
