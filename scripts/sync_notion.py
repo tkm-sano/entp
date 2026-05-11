@@ -33,7 +33,7 @@ def _extract_notion_id(raw: str) -> str:
         return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
     return raw
 
-NOTION_DB_ID   = _extract_notion_id(os.environ.get("NOTION_DB_ID", "1c60cd11-eda2-4625-8549-3f5896c7ce05"))
+NOTION_DB_ID   = _extract_notion_id(os.environ.get("NOTION_DB_ID") or "1c60cd11-eda2-4625-8549-3f5896c7ce05")
 NOTION_API     = "https://api.notion.com/v1"
 NOTION_VER     = "2022-06-28"
 CREDS_FILE     = os.environ.get("GOOGLE_SHEETS_CREDS_FILE", "creds.json")
@@ -202,8 +202,22 @@ def main() -> None:
     if not token:
         print("⚠️  NOTION_TOKEN が未設定のため Notion 同期をスキップします。")
         return
-    print(f"🔍 NOTION_DB_ID: {NOTION_DB_ID}")
+    print(f"🔍 NOTION_DB_ID: '{NOTION_DB_ID}'")
     print(f"🔍 TOKEN prefix: {token[:10]}...")
+
+    # トークン・DB アクセス確認
+    try:
+        me = notion_request("GET", "/users/me", token)
+        print(f"✅ Notion token OK: {me.get('name', me.get('type', '?'))}")
+    except Exception as e:
+        print(f"❌ Token test failed: {e}")
+        return
+    try:
+        db_test = notion_request("POST", f"/databases/{NOTION_DB_ID}/query", token, {"page_size": 1})
+        print(f"✅ DB access OK: {db_test.get('object', '?')} ({len(db_test.get('results', []))} results)")
+    except Exception as e:
+        print(f"❌ DB access failed: {e}")
+        return
 
     scope = [
         "https://spreadsheets.google.com/feeds",
